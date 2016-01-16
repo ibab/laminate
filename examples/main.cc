@@ -8,39 +8,38 @@
 
 // Example for how to write messages
 void write_messages(const std::string& filename, int number) {
-    laminate::RowStore store(filename, "w");
+  laminate::RowStore store(filename, "w");
 
-    example::Person person;
+  example::Person person;
 
-    for (int i = 0; i < number; i++) {
-        person.set_name("A. Person");
-        person.set_email("person@example.com");
-        for (int j = 0; j < 3; j++) {
-            auto number = person.add_phones();
-            number->set_number("999999999");
-            number->set_type(example::Person::MOBILE);
-        }
-        store.Put(person);
-        // Make sure to clear the message after each write!
-        person.Clear();
+  for (int i = 0; i < number; i++) {
+    person.set_name("A. Person");
+    person.set_email("person@example.com");
+    for (int j = 0; j < 3; j++) {
+      auto number = person.add_phones();
+      number->set_number("999999999");
+      number->set_type(example::Person::MOBILE);
     }
+    store.Put(person);
+    // Make sure to clear the message after each write!
+    person.Clear();
+  }
 }
 
 // Example for how to read messages
 void print_messages(const std::string& filename, int number) {
-    laminate::RowStore store(filename, "r");
-    example::Person person;
+  laminate::RowStore store(filename, "r");
+  example::Person person;
 
-    for (int i = 0; i < number; i++) {
-        store.ReadNext(person);
-        std::string out;
-        google::protobuf::TextFormat::PrintToString(person, &out);
-        std::cout << out;
-    }
-
+  for (int i = 0; i < number; i++) {
+    store.ReadNext(person);
+    std::string out;
+    google::protobuf::TextFormat::PrintToString(person, &out);
+    std::cout << out;
+  }
 }
 
 int main() {
-    write_messages("data.rows", 10000);
-    print_messages("data.rows", 1);
+  write_messages("data.rows", 10000);
+  print_messages("data.rows", 1);
 }
