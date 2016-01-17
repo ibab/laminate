@@ -43,18 +43,13 @@ void BloscOutputStream::compressAndPush() {
 
     while (written < blosc_buffer_size) {
         output_->Next(&out_buffer, &out_size);
-        std::cout << "They gave us " << out_size << " to write" << std::endl;
-        std::cout << "blosc_buffer_size is " << blosc_buffer_size << std::endl;
         if (written + out_size > blosc_buffer_size) {
             // This is the last chunk
-            std::cout << "Writing " << blosc_buffer_size - written << std::endl;
             memcpy(out_buffer, (char*)blosc_buffer + written, blosc_buffer_size - written);
             // Let's back up the bit we don't want to write
             output_->BackUp(out_size - (blosc_buffer_size - written));
-            std::cout << "Only writing " << blosc_buffer_size - written << std::endl;
             written = blosc_buffer_size;
         } else {
-            std::cout << "Writing the full " << out_size << std::endl;
             // We're not finished yet
             memcpy(out_buffer, (char*)blosc_buffer + written, out_size);
             written += out_size;
