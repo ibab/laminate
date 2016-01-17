@@ -18,13 +18,13 @@ class BloscOutputStream: public google::protobuf::io::ZeroCopyOutputStream {
         bool Next(void** data, int* size);
         void BackUp(int count);
         int64 ByteCount() const;
+        void Flush();
     private:
-        void compressAndPush();
         void* buffer_;
         int buffer_size_;
+        int buffer_filled_;
         int64 bytes_written_;
         google::protobuf::io::ZeroCopyOutputStream* output_;
-        bool fresh_;
         int typesize_;
 };
 

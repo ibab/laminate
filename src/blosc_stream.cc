@@ -1,39 +1,42 @@
 #include <iostream>
 #include "blosc_stream.h"
 
+#define LAMINATE_BLOSC_CHUNKSIZE 1024*1024
+
 using google::protobuf::io::ZeroCopyOutputStream;
 
 BloscOutputStream::BloscOutputStream(ZeroCopyOutputStream* output, int typesize) 
-   : buffer_size_(1000000),
+   : buffer_size_(LAMINATE_BLOSC_CHUNKSIZE),
+     buffer_filled_(0),
      output_(output),
      bytes_written_(0),
-     fresh_(true),
      typesize_(typesize) {
        buffer_ = operator new(buffer_size_);
 }
 
 BloscOutputStream::~BloscOutputStream() {
-    // FIXME
-    compressAndPush();
+    if (buffer_filled_ > 0) {
+        Flush();
+    }
     operator delete(buffer_);
 }
 
-void BloscOutputStream::compressAndPush() {
+void BloscOutputStream::Flush() {
 
-    int blosc_max_buffer_size = buffer_size_ + BLOSC_MAX_OVERHEAD;
+    int blosc_max_buffer_size = buffer_filled_ + BLOSC_MAX_OVERHEAD;
     void* blosc_buffer = operator new(blosc_max_buffer_size);
 
     int blosc_buffer_size = blosc_compress_ctx(
-            5, // clevel
+            7, // clevel
             1, // doshuffle
             typesize_, // typesize
-            buffer_size_, // nbytes
+            buffer_filled_, // nbytes
             buffer_, // src
             blosc_buffer, // dest
-            buffer_size_ + BLOSC_MAX_OVERHEAD, // destsize
+            blosc_max_buffer_size, // destsize
             "blosclz", // compressor
             0, // blocksize
-            4  // numinternalthreads
+            8  // numinternalthreads
     );
 
     void* out_buffer;
@@ -56,29 +59,38 @@ void BloscOutputStream::compressAndPush() {
         }
     }
 
-    bytes_written_ += buffer_size_;
+    bytes_written_ += buffer_filled_;
 
     operator delete(blosc_buffer);
 }
 
 bool BloscOutputStream::Next(void** data, int* size) {
+    // We try to fill up a buffer of LAMINATE_BLOSC_CHUNKSIZE bytes
+    // before compressing and passing the data downstream.
+    // If we get destroyed, we are forced to flush the incomplete buffer.
 
-    // Perform compression of data from last call to Next(),
-    // unless this is the very first call
-    if (!fresh_) {
-        compressAndPush();
+    if (buffer_filled_ < buffer_size_) {
+        // Internal buffer is not full, hand out the remaining chunk
+        *data = (char*) buffer_ + buffer_filled_;
+        *size = buffer_size_ - buffer_filled_;
     } else {
-        fresh_ = false;
+        // Internal buffer is full, compress and push downstream
+        Flush();
+        // We reuse the existing buffer
+        *data = buffer_;
+        *size = buffer_size_;
     }
 
-    *data = buffer_;
-    *size = buffer_size_;
+    // Assume that user has filled out buffer completely
+    buffer_filled_ = buffer_size_;
 
     return true;
 }
 
 void BloscOutputStream::BackUp(int count) {
-    buffer_size_ -= count;
+    // FIXME Don't allow to back up more than has been written in
+    // last call to Next()
+    buffer_filled_ -= count;
 }
 
 int64 BloscOutputStream::ByteCount() const {
