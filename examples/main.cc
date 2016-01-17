@@ -39,20 +39,7 @@ void print_messages(const std::string& filename, int number) {
   }
 }
 
-#include <google/protobuf/io/zero_copy_stream.h>
-#include <google/protobuf/io/zero_copy_stream_impl.h>
-#include "blosc_stream.h"
-using google::protobuf::io::FileOutputStream;
-using google::protobuf::io::ZeroCopyOutputStream;
-
-void test_blosc() {
-  ZeroCopyOutputStream *file = new FileOutputStream(0);
-  ZeroCopyOutputStream *output = new BloscOutputStream(file);
-
-}
-
 int main() {
   write_messages("data.rows", 1000);
   print_messages("data.rows", 1);
-  test_blosc();
 }
