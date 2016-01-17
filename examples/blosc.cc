@@ -16,9 +16,14 @@ int main() {
 
   std::random_device rd;
   std::mt19937 rand(rd());
-  std::uniform_int_distribution<> uniform(0, 1);
+  std::uniform_int_distribution<> uniform(0, 100);
 
-  BloscOutputStream* blosc = new BloscOutputStream(out, sizeof(int));
+  auto options = BloscOutputStream::DefaultOptions();
+  options.compressor = "blosclz";
+  options.compression_level = 9;
+  options.use_shuffling = true;
+  options.typesize_bits = 32;
+  BloscOutputStream* blosc = new BloscOutputStream(out, options);
 
   void* data;
   int size;
@@ -26,9 +31,12 @@ int main() {
   for (int j = 0; j < 100; j++) {
     blosc->Next(&data, &size);
     int* arr = (int*)data;
-    for (int i = 0; i < size / 4; i++) {
-      arr[i] = uniform(rand) % 10;
+    int numbers = size / 4;
+    for (int i = 0; i < numbers; i++) {
+      arr[i] = uniform(rand);
     }
+    int rest = size - numbers * 4;
+    blosc->BackUp(rest);
   }
 
   delete blosc;

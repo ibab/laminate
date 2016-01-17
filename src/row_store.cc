@@ -84,7 +84,17 @@ RowStore::RowStore(std::string filename, std::string mode) {
   input_ = nullptr;
   if (mode == "w") {
     file_out_ = new FileOutputStream(fd_);
-    output_ = new BloscOutputStream(file_out_, 4);
+    auto options = BloscOutputStream::DefaultOptions();
+    // Bit shuffling would only permute our record contents
+    // and would make inhomogeneous data harder to compress,
+    // so we disable it here.
+    options.use_shuffling = false;
+    // We pick zlib here, which means we will need longer
+    // to compress the data, but this should give use a better
+    // compression ratio.
+    options.compressor = "zlib";
+    options.compression_level = 7;
+    output_ = new BloscOutputStream(file_out_, options);
   } else if (mode == "r") {
     file_in_ = new FileInputStream(fd_);
     // Not implemented yet

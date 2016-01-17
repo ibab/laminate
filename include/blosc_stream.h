@@ -8,15 +8,60 @@ using google::protobuf::int64;
 
 class BloscOutputStream : public google::protobuf::io::ZeroCopyOutputStream {
   public:
+  /* 
+   * Options for the blosc compressor and the output stream.
+   * Many of these are identical to the arguments of the
+   * `blosc_decompress` function in `blosc.h`.
+   */
+  class Options {
+      public:
+          // Default: 5
+          int compression_level;
+          // As we can't know about the size of the
+          // data type a priori, we disable bit shuffling.
+          // Set this to `true` if your input data is homogeneous
+          // and you know the length of each item in bits.
+          // Default: false
+          bool use_shuffling;
+          // Default: 32
+          int typesize_bits;
+          // Default: "blosclz"
+          std::string compressor;
+          // Blosc will automatically pick a blocksize
+          // Default: 0
+          int blocksize;
+          // Default: 4
+          int numinternalthread;
+          // Length of the internal buffer that the output stream
+          // will try to fill and compress in one piece.
+          // As blosc introduces a small header for each chunk,
+          // settings this to a larger number could make sense if
+          // your data is highly compressed.
+          // Default: 1024 * 1024 bytes
+          int chunk_size;
+  };
+
+  /*
+   * Constructor assuming default compression options
+   */
+  BloscOutputStream(google::protobuf::io::ZeroCopyOutputStream* output);
+  /*
+   * Constructor that allows you to set compression options
+   */
   BloscOutputStream(google::protobuf::io::ZeroCopyOutputStream* output,
-                    // The size of the type to be stored in bits
-                    // Allows blosc to do its blocking magic
-                    int typesize);
+                    const Options& options);
   ~BloscOutputStream();
   bool Next(void** data, int* size);
   void BackUp(int count);
   int64 ByteCount() const;
+  /*
+   * Compresses the internal buffer and writes it downstream.
+   * Calling this function can result in compressed chunks smaller
+   * than the default one and thus smaller compression ratios.
+   */
   void Flush();
+
+  static Options DefaultOptions();
 
   private:
   void* buffer_;
@@ -25,6 +70,17 @@ class BloscOutputStream : public google::protobuf::io::ZeroCopyOutputStream {
   int64 bytes_written_;
   google::protobuf::io::ZeroCopyOutputStream* output_;
   int typesize_;
+  Options options_;
+};
+
+class BloscInputStream : public google::protobuf::io::ZeroCopyInputStream {
+  public:
+  BloscInputStream(google::protobuf::io::ZeroCopyInputStream* input);
+  ~BloscInputStream();
+  bool Next(const void** data, int* size);
+  void BackUp(int count);
+  bool Skip(int count);
+  int64 ByteCount() const;
 };
 
 #endif

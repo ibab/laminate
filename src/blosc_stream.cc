@@ -1,16 +1,18 @@
 #include <iostream>
 #include "blosc_stream.h"
 
-#define LAMINATE_BLOSC_CHUNKSIZE 1024 * 1024
-
 using google::protobuf::io::ZeroCopyOutputStream;
 
-BloscOutputStream::BloscOutputStream(ZeroCopyOutputStream* output, int typesize)
-    : buffer_size_(LAMINATE_BLOSC_CHUNKSIZE),
+BloscOutputStream::BloscOutputStream(ZeroCopyOutputStream* output)
+    : BloscOutputStream(output, DefaultOptions()) {}
+
+BloscOutputStream::BloscOutputStream(ZeroCopyOutputStream* output,
+                                     const Options& options)
+    : buffer_size_(options.chunk_size),
       buffer_filled_(0),
-      output_(output),
       bytes_written_(0),
-      typesize_(typesize) {
+      output_(output),
+      options_(options) {
   buffer_ = operator new(buffer_size_);
 }
 
@@ -21,21 +23,16 @@ BloscOutputStream::~BloscOutputStream() {
   operator delete(buffer_);
 }
 
+// TODO handle errors on write
 void BloscOutputStream::Flush() {
   int blosc_max_buffer_size = buffer_filled_ + BLOSC_MAX_OVERHEAD;
   void* blosc_buffer = operator new(blosc_max_buffer_size);
 
-  int blosc_buffer_size = blosc_compress_ctx(7,               // clevel
-                                             1,               // doshuffle
-                                             typesize_,       // typesize
-                                             buffer_filled_,  // nbytes
-                                             buffer_,         // src
-                                             blosc_buffer,    // dest
-                                             blosc_max_buffer_size,  // destsize
-                                             "blosclz",  // compressor
-                                             0,          // blocksize
-                                             8           // numinternalthreads
-                                             );
+  int blosc_buffer_size = blosc_compress_ctx(
+      options_.compression_level, options_.use_shuffling,
+      options_.typesize_bits, buffer_filled_, buffer_, blosc_buffer,
+      blosc_max_buffer_size, options_.compressor.c_str(), options_.blocksize,
+      options_.numinternalthread);
 
   void* out_buffer;
   int out_size;
@@ -90,6 +87,18 @@ void BloscOutputStream::BackUp(int count) {
   // FIXME Don't allow to back up more than has been written in
   // last call to Next()
   buffer_filled_ -= count;
+}
+
+BloscOutputStream::Options BloscOutputStream::DefaultOptions() {
+  Options options;
+  options.compression_level = 5;
+  options.typesize_bits = 32;
+  options.use_shuffling = false;
+  options.numinternalthread = 4;
+  options.compressor = "blosclz";
+  options.chunk_size = 1024 * 1024;
+
+  return options;
 }
 
 int64 BloscOutputStream::ByteCount() const { return bytes_written_; }
