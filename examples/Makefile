@@ -1,6 +1,8 @@
 CXX=clang++
 LIBS=$(shell pkg-config --libs protobuf) -lblosc
-CXXFLAGS=-O0 -ggdb -I../include -std=c++14 $(shell pkg-config --cflags protobuf)
+CXXFLAGS=-ggdb -O0 -I../include -std=c++14 $(shell pkg-config --cflags protobuf)
+
+all: main blosc
 
 blosc: blosc.o ../src/blosc_stream.o
 	$(CXX) $(LIBS) -o $@ $^
