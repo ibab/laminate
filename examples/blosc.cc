@@ -19,24 +19,30 @@ int main() {
   std::uniform_int_distribution<> uniform(0, 100);
 
   auto options = BloscOutputStream::DefaultOptions();
-  options.compressor = "blosclz";
-  options.compression_level = 9;
+  options.compressor = "lz4";
+  options.compression_level = 7;
   options.use_shuffling = true;
   options.typesize_bits = 32;
+  options.chunk_size = 2 * 1024 * 1024;
   BloscOutputStream* blosc = new BloscOutputStream(out, options);
 
   void* data;
   int size;
 
-  for (int j = 0; j < 100; j++) {
+  int total_number= 1000000;
+  int written = 0;
+  while (written < total_number) {
     blosc->Next(&data, &size);
     int* arr = (int*)data;
-    int numbers = size / 4;
-    for (int i = 0; i < numbers; i++) {
+    int to_write = size / 4;
+
+    for (int i = 0; i < to_write; i++) {
       arr[i] = uniform(rand);
     }
-    int rest = size - numbers * 4;
+    int rest = size - to_write * 4;
+
     blosc->BackUp(rest);
+    written += to_write;
   }
 
   delete blosc;
