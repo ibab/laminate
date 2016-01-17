@@ -70,7 +70,7 @@ class BloscOutputStream : public google::protobuf::io::ZeroCopyOutputStream {
   int64 bytes_written_;
   google::protobuf::io::ZeroCopyOutputStream* output_;
   int typesize_;
-  Options options_;
+  const Options options_;
 };
 
 class BloscInputStream : public google::protobuf::io::ZeroCopyInputStream {

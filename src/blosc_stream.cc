@@ -61,7 +61,7 @@ void BloscOutputStream::Flush() {
 }
 
 bool BloscOutputStream::Next(void** data, int* size) {
-  // We try to fill up a buffer of LAMINATE_BLOSC_CHUNKSIZE bytes
+  // We try to fill up a buffer of `options.chunk_size` bytes
   // before compressing and passing the data downstream.
   // If we get destroyed, we are forced to flush the incomplete buffer.
 
