@@ -12,7 +12,8 @@ which make use of ideas from the Dremel paper.
 But there doesn't seem to be a library for storing protobuf messages using C++ at the moment.
 
 The plan is to implement a custom Dremel-like data format with a simple API that interfaces nicely with protobuf.
-The individual data columns will be automatically compressed using the excellent [Blosc](http://www.blosc.org/) library.
+The individual data columns will be compressed using the excellent [Blosc](http://www.blosc.org/) library.
+The implementation of the Blosc interface can be found in [include/blosc_stream.h](include/blosc_stream.h).
 
 A simple row-based format that demonstrates how the API could look has already been implemented in [include/row_store.h](include/row_store.h).
 You can find an example on how to use it in the [examples](examples/) directory.
