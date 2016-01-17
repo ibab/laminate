@@ -66,7 +66,9 @@ class RowStore {
   private:
   int fd_;
   bool is_open_;
+  google::protobuf::io::ZeroCopyOutputStream *file_out_;
   google::protobuf::io::ZeroCopyOutputStream *output_;
+  google::protobuf::io::ZeroCopyInputStream *file_in_;
   google::protobuf::io::ZeroCopyInputStream *input_;
 };
 }

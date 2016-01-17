@@ -13,6 +13,8 @@
 #include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <google/protobuf/io/coded_stream.h>
 
+#include "blosc_stream.h"
+
 using namespace laminate;
 
 using google::protobuf::Message;
@@ -72,7 +74,7 @@ bool readDelimitedFrom(google::protobuf::io::ZeroCopyInputStream *rawInput,
 RowStore::RowStore(std::string filename, std::string mode) {
   int omode = 0;
   if (mode == "w") {
-    omode = O_CREAT | O_WRONLY;
+    omode = O_CREAT | O_WRONLY | O_TRUNC;
   } else if (mode == "r") {
     omode = O_RDONLY;
   }
@@ -81,21 +83,25 @@ RowStore::RowStore(std::string filename, std::string mode) {
   output_ = nullptr;
   input_ = nullptr;
   if (mode == "w") {
-    output_ = new FileOutputStream(fd_);
+    file_out_ = new FileOutputStream(fd_);
+    output_ = new BloscOutputStream(file_out_, 4);
   } else if (mode == "r") {
-    input_ = new FileInputStream(fd_);
+    file_in_ = new FileInputStream(fd_);
+    // Not implemented yet
   }
 }
 
 RowStore::~RowStore() {
   if (input_ == nullptr) {
     delete output_;
+    delete file_out_;
   }
   if (output_ == nullptr) {
     delete input_;
+    delete file_in_;
   }
   if (IsOpen()) {
-    close(fd_);
+    Close();
   }
 }
 
