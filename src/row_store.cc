@@ -113,21 +113,21 @@ void RowStore::Put(const google::protobuf::Message &message) {
   writeDelimitedTo(message, output_);
 }
 
-void RowStore::ReadNext(google::protobuf::Message &message) {
+void RowStore::ReadNext(google::protobuf::Message *message) {
   if (!input_) {
     std::cerr << "RowStore not opened in read mode" << std::endl;
     exit(1);
   }
-  message.Clear();
+  message->Clear();
   MergeNext(message);
 }
 
-void RowStore::MergeNext(google::protobuf::Message &message) {
+void RowStore::MergeNext(google::protobuf::Message *message) {
   if (!input_) {
     std::cerr << "RowStore not opened in read mode" << std::endl;
     exit(1);
   }
-  readDelimitedFrom(input_, &message);
+  readDelimitedFrom(input_, message);
 }
 
 bool RowStore::IsOpen() { return is_open_; }

@@ -32,7 +32,7 @@ void print_messages(const std::string& filename, int number) {
   example::Person person;
 
   for (int i = 0; i < number; i++) {
-    store.ReadNext(person);
+    store.ReadNext(&person);
     std::string out;
     google::protobuf::TextFormat::PrintToString(person, &out);
     std::cout << out;

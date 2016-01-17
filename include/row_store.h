@@ -46,14 +46,14 @@ class RowStore {
    * The given message is automatically cleared before
    * reading when passing it to this function.
    */
-  void ReadNext(google::protobuf::Message &message);
+  void ReadNext(google::protobuf::Message *message);
   /*
    * Reads the next protocol buffer message contained
    * in the RowStore into the given message.
    * The given message is not cleared, which means
    * that the fields will be merged into it.
    */
-  void MergeNext(google::protobuf::Message &message);
+  void MergeNext(google::protobuf::Message *message);
   /*
    * Checks if the store is currently open.
    */
