@@ -11,29 +11,28 @@
 using namespace google::protobuf;
 
 int main() {
+  int fd = open("out.blosc", O_CREAT | O_WRONLY | O_TRUNC, 0600);
+  io::ZeroCopyOutputStream* out = new io::FileOutputStream(fd);
 
-    int fd = open("out.blosc", O_CREAT | O_WRONLY | O_TRUNC, 0600);
-    io::ZeroCopyOutputStream* out = new io::FileOutputStream(fd);
+  std::random_device rd;
+  std::mt19937 rand(rd());
+  std::uniform_int_distribution<> uniform(0, 1);
 
-    std::random_device rd;
-    std::mt19937 rand(rd());
-    std::uniform_int_distribution<> uniform(0, 1);
+  BloscOutputStream* blosc = new BloscOutputStream(out, sizeof(int));
 
-    BloscOutputStream* blosc = new BloscOutputStream(out, sizeof(int));
+  void* data;
+  int size;
 
-    void* data;
-    int size;
-
-    for (int j = 0; j < 100; j++) {
-        blosc->Next(&data, &size);
-        int* arr = (int*) data;
-        for (int i = 0; i < size / 4; i++) {
-            arr[i] = uniform(rand) % 10;
-        }
+  for (int j = 0; j < 100; j++) {
+    blosc->Next(&data, &size);
+    int* arr = (int*)data;
+    for (int i = 0; i < size / 4; i++) {
+      arr[i] = uniform(rand) % 10;
     }
+  }
 
-    delete blosc;
-    delete out;
+  delete blosc;
+  delete out;
 
-    return 0;
+  return 0;
 }
