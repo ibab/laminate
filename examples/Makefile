@@ -1,13 +1,13 @@
 CXX=clang++
 LIBS=$(shell pkg-config --libs protobuf) -lblosc
-CXXFLAGS=-ggdb -O0 -I../include -std=c++14 $(shell pkg-config --cflags protobuf)
+CXXFLAGS=-O3 -I../include -std=c++14 $(shell pkg-config --cflags protobuf)
 
 all: row_store blosc
 
 blosc: blosc.o ../src/blosc_stream.o
 	$(CXX) $(LIBS) -o $@ $^
 
-row_store: main.pb.o ../src/row_store.o ../src/blosc_stream.o main.o
+row_store: main.pb.o ../src/row_store.o ../src/blosc_stream.o row_store.o
 	$(CXX) $(LIBS) -o $@ $^
 
 %.o: %.cc

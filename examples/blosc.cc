@@ -11,7 +11,7 @@
 #include "blosc_stream.h"
 
 
-const uint32_t total_number= 20000000;
+const uint32_t total_number= 30000000;
 
 using namespace google::protobuf;
 
@@ -50,6 +50,7 @@ void readValues() {
     io::ZeroCopyInputStream* in = new io::FileInputStream(fd);
     io::ZeroCopyInputStream* blosc = new BloscInputStream(in);
     io::CodedInputStream* coded = new io::CodedInputStream(blosc);
+    coded->SetTotalBytesLimit(500000000, -1);
 
     std::mt19937 rand(0);
     std::uniform_int_distribution<> uniform(0, 100);
@@ -63,7 +64,6 @@ void readValues() {
             exit(1);
         }
     }
-    std::cout << in->ByteCount() << std::endl;
 }
 
 int main() {

@@ -46,7 +46,6 @@ void BloscOutputStream::Flush() {
   //  - uncompressed size of chunk
   coded.WriteVarint32(blosc_buffer_size);
   coded.WriteVarint32(buffer_filled_);
-  std::cout << "Writing " << buffer_filled_ << std::endl;
 
   // Then, we write the compressed chunk itself
   // XXX Can we avoid the malloc and copy in WriteRaw()?
@@ -131,7 +130,6 @@ bool BloscInputStream::readChunk() {
 
     ok &= coded.ReadRaw(compressed_data, compressed_size);
     coded.PopLimit(limit);
-    std::cout << "Bytes until limit: " << coded.BytesUntilTotalBytesLimit() << std::endl;
 
     int out;
     if (ok) {
@@ -141,7 +139,6 @@ bool BloscInputStream::readChunk() {
                 uncompressed_size_,
                 4);
     }
-    std::cout << uncompressed_size_ << std::endl;
 
     operator delete(compressed_data);
     served_ = 0;
@@ -150,7 +147,6 @@ bool BloscInputStream::readChunk() {
 
 bool BloscInputStream::Next(const void** data, int* size) {
     if (served_ == uncompressed_size_) {
-        std::cout << "Calling readChunk()" << std::endl;
         bool ok = readChunk();
         if (!ok) { return false; }
     }
@@ -163,7 +159,7 @@ bool BloscInputStream::Next(const void** data, int* size) {
 }
 
 void BloscInputStream::BackUp(int count) {
-    std::cout << "Back up " << count << std::endl;
+    //std::cout << "Back up " << count << std::endl;
     served_ -= count;
     bytecount_ -= count;
 }

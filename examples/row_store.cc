@@ -27,19 +27,19 @@ void write_messages(const std::string& filename, int number) {
 }
 
 // Example for how to read messages
-void print_messages(const std::string& filename, int number) {
+void print_messages(const std::string& filename) {
   laminate::RowStore store(filename, "r");
   example::Person person;
 
-  for (int i = 0; i < number; i++) {
-    store.ReadNext(&person);
-    std::string out;
-    google::protobuf::TextFormat::PrintToString(person, &out);
-    std::cout << out;
+  while (store.ReadNext(&person)) {
+    //std::string out;
+    //google::protobuf::TextFormat::PrintToString(person, &out);
+    //std::cout << "Read message" << std::endl;
+    //std::cout << out;
   }
 }
 
 int main() {
   write_messages("data.rows", 1000000);
-  // print_messages("data.rows", 1);
+  print_messages("data.rows");
 }

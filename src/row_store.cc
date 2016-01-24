@@ -92,7 +92,7 @@ RowStore::RowStore(std::string filename, std::string mode) {
     output_ = new BloscOutputStream(file_out_, options);
   } else if (mode == "r") {
     file_in_ = new FileInputStream(fd_);
-    // Not implemented yet
+    input_ = new BloscInputStream(file_in_);
   }
 }
 
@@ -118,21 +118,21 @@ void RowStore::Put(const google::protobuf::Message &message) {
   writeDelimitedTo(message, output_);
 }
 
-void RowStore::ReadNext(google::protobuf::Message *message) {
+bool RowStore::ReadNext(google::protobuf::Message *message) {
   if (!input_) {
     std::cerr << "RowStore not opened in read mode" << std::endl;
     exit(1);
   }
   message->Clear();
-  MergeNext(message);
+  return MergeNext(message);
 }
 
-void RowStore::MergeNext(google::protobuf::Message *message) {
+bool RowStore::MergeNext(google::protobuf::Message *message) {
   if (!input_) {
     std::cerr << "RowStore not opened in read mode" << std::endl;
     exit(1);
   }
-  readDelimitedFrom(input_, message);
+  return readDelimitedFrom(input_, message);
 }
 
 bool RowStore::IsOpen() { return is_open_; }
