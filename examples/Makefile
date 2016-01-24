@@ -1,6 +1,6 @@
 CXX=clang++
 LIBS=$(shell pkg-config --libs protobuf) -lblosc
-CXXFLAGS=-O3 -I../include -std=c++14 $(shell pkg-config --cflags protobuf)
+CXXFLAGS=-O3 -g -fno-omit-frame-pointer -I../include -std=c++14 $(shell pkg-config --cflags protobuf)
 
 all: row_store blosc
 

@@ -65,14 +65,13 @@ class BloscOutputStream : public google::protobuf::io::ZeroCopyOutputStream {
   static Options DefaultOptions();
 
   private:
-  void* buffer_;
-  void* blosc_buffer_;
+  const Options options_;
   int buffer_size_;
   int buffer_filled_;
+  void* buffer_;
+  void* blosc_buffer_;
   int64 bytes_written_;
   google::protobuf::io::ZeroCopyOutputStream* output_;
-  int typesize_;
-  const Options options_;
 };
 
 class BloscInputStream : public google::protobuf::io::ZeroCopyInputStream {

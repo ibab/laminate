@@ -87,7 +87,7 @@ RowStore::RowStore(std::string filename, std::string mode) {
     // We pick zlib here, which means we will need longer
     // to compress the data, but this should give use a better
     // compression ratio.
-    options.compressor = "zlib";
+    options.compressor = "blosclz";
     options.compression_level = 7;
     output_ = new BloscOutputStream(file_out_, options);
   } else if (mode == "r") {

@@ -11,20 +11,20 @@ BloscOutputStream::BloscOutputStream(ZeroCopyOutputStream* output)
 
 BloscOutputStream::BloscOutputStream(ZeroCopyOutputStream* output,
                                      const Options& options)
-    : buffer_size_(options.chunk_size),
+    : options_(options),
+      buffer_size_(options.chunk_size),
       buffer_filled_(0),
+      buffer_(operator new(buffer_size_)),
+      blosc_buffer_(operator new(options.chunk_size + BLOSC_MAX_OVERHEAD)),
       bytes_written_(0),
-      output_(output),
-      options_(options) {
-  buffer_ = operator new(buffer_size_);
-  blosc_buffer_ = operator new(options.chunk_size + BLOSC_MAX_OVERHEAD);
-}
+      output_(output) {}
 
 BloscOutputStream::~BloscOutputStream() {
   if (buffer_filled_ > 0) {
     Flush();
   }
   operator delete(buffer_);
+  operator delete(blosc_buffer_);
 }
 
 // XXX handle errors on write
@@ -32,9 +32,15 @@ void BloscOutputStream::Flush() {
   int blosc_max_buffer_size = buffer_filled_ + BLOSC_MAX_OVERHEAD;
 
   int blosc_buffer_size = blosc_compress_ctx(
-      options_.compression_level, options_.use_shuffling,
-      options_.typesize_bits, buffer_filled_, buffer_, blosc_buffer_,
-      blosc_max_buffer_size, options_.compressor.c_str(), options_.blocksize,
+      options_.compression_level,
+      options_.use_shuffling,
+      options_.typesize_bits,
+      buffer_filled_,
+      buffer_,
+      blosc_buffer_,
+      blosc_max_buffer_size,
+      options_.compressor.c_str(),
+      options_.blocksize,
       options_.numinternalthread);
 
   // We create a new CodedOutputStream for each compressed
@@ -88,6 +94,7 @@ BloscOutputStream::Options BloscOutputStream::DefaultOptions() {
   Options options;
   options.compression_level = 5;
   options.typesize_bits = 32;
+  options.blocksize = 0;
   options.use_shuffling = false;
   options.numinternalthread = 4;
   options.compressor = "blosclz";
@@ -153,13 +160,13 @@ bool BloscInputStream::Next(const void** data, int* size) {
 
     *data = (char*) uncompressed_data_ + served_;
     *size = uncompressed_size_ - served_;
+
     served_ = uncompressed_size_;
     bytecount_ += *size;
     return true;
 }
 
 void BloscInputStream::BackUp(int count) {
-    //std::cout << "Back up " << count << std::endl;
     served_ -= count;
     bytecount_ -= count;
 }

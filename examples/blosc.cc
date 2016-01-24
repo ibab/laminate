@@ -64,6 +64,10 @@ void readValues() {
             exit(1);
         }
     }
+
+    delete coded;
+    delete blosc;
+    delete in;
 }
 
 int main() {

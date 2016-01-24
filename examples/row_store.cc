@@ -40,6 +40,6 @@ void print_messages(const std::string& filename) {
 }
 
 int main() {
-  write_messages("data.rows", 1000000);
+  write_messages("data.rows", 10000000);
   print_messages("data.rows");
 }
