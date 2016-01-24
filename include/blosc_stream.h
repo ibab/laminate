@@ -2,6 +2,7 @@
 #define LAMINATE_BLOSC_STREAM_H
 
 #include <google/protobuf/io/zero_copy_stream.h>
+#include <google/protobuf/io/coded_stream.h>
 #include <blosc.h>
 
 using google::protobuf::int64;
@@ -65,6 +66,7 @@ class BloscOutputStream : public google::protobuf::io::ZeroCopyOutputStream {
 
   private:
   void* buffer_;
+  void* blosc_buffer_;
   int buffer_size_;
   int buffer_filled_;
   int64 bytes_written_;
@@ -81,6 +83,14 @@ class BloscInputStream : public google::protobuf::io::ZeroCopyInputStream {
   void BackUp(int count);
   bool Skip(int count);
   int64 ByteCount() const;
+  private:
+  google::protobuf::io::ZeroCopyInputStream* input_;
+  void* uncompressed_data_;
+  uint32_t uncompressed_size_;
+  uint32_t read_;
+  uint32_t served_;
+  uint32_t bytecount_;
+  bool readChunk();
 };
 
 #endif
