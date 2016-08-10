@@ -15,7 +15,7 @@
 
 #include "blosc_stream.h"
 
-using namespace laminate;
+namespace laminate {
 
 using google::protobuf::Message;
 using google::protobuf::io::ZeroCopyOutputStream;
@@ -141,3 +141,5 @@ void RowStore::Close() {
   close(fd_);
   is_open_ = false;
 }
+
+}  // namespace laminate

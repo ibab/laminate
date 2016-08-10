@@ -138,13 +138,12 @@ bool BloscInputStream::readChunk() {
     ok &= coded.ReadRaw(compressed_data, compressed_size);
     coded.PopLimit(limit);
 
-    int out;
     if (ok) {
-        out = blosc_decompress_ctx(
-                compressed_data,
-                uncompressed_data_,
-                uncompressed_size_,
-                4);
+        blosc_decompress_ctx(
+            compressed_data,
+            uncompressed_data_,
+            uncompressed_size_,
+            4);
     }
 
     operator delete(compressed_data);
