@@ -1,0 +1,26 @@
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - gcc-4.8
+      - g++-4.8
+      - wget
+      # Package list from http://bazel.io/docs/install.html
+      - openjdk-7-jdk
+      - openjdk-7-source
+      - pkg-config
+      - zip
+      - zlib1g-dev
+
+before_install:
+  - wget 'https://github.com/bazelbuild/bazel/releases/download/0.3.1/bazel-0.3.1-jdk7-installer-linux-x86_64.sh'
+  - wget 'bazel-0.3.1-jdk7-installer-linux-x86_64.sh.sha256'
+  - sha256sum -c bazel-0.3.1-jdk7-installer-linux-x86_64.sh.sha256
+  - bash bazel-0.3.1-jdk7-installer-linux-x86_64.sh --user
+
+script:
+  - bazel test //...
+  # Make sure that examples compile and run
+  - bazel run //examples:row_store
+  - bazel run //examples:column_store
