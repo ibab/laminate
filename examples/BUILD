@@ -12,6 +12,7 @@ cc_proto_library(
 cc_binary(
     name = "column_store",
     srcs = ["column_store.cc"],
+    copt = ["-std=c++11"],
     deps = ["//:laminate",
             "example_protobuf"],
 )
@@ -19,6 +20,7 @@ cc_binary(
 cc_binary(
     name = "row_store",
     srcs = ["row_store.cc"],
+    copt = ["-std=c++11"],
     deps = ["//:laminate",
             "example_protobuf"],
 )
@@ -26,6 +28,7 @@ cc_binary(
 cc_binary(
     name = "blosc_example",
     srcs = ["blosc.cc"],
+    copt = ["-std=c++11"],
     deps = ["//:laminate"],
 )
 
