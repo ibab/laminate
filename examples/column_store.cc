@@ -1,7 +1,7 @@
 
 #include <iostream>
 #include "column_store.h"
-#include "examples/main.pb.h"
+#include "examples/example.pb.h"
 
 using namespace example;
 

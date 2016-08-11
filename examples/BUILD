@@ -3,7 +3,7 @@ load('@protobuf//:protobuf.bzl', 'cc_proto_library')
 
 cc_proto_library(
     name = "example_protobuf",
-    srcs =["main.proto"],
+    srcs =["example.proto"],
     cc_libs = ["@protobuf//:protobuf"],
     protoc = "@protobuf//:protoc",
     default_runtime = "@protobuf//:protobuf",
