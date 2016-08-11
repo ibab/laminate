@@ -6,6 +6,7 @@ startup --batch
 common --ignore_unsupported_sandboxing
 common --genrule_strategy=standalone
 common --spawn_strategy=standalone
+common --color=yes
 
 # Build options
 common --linkopt=-lrt
