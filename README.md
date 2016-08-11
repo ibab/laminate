@@ -1,5 +1,7 @@
 # protobuf-laminate
 
+[![Build Status](https://travis-ci.org/ibab/protobuf-laminate.svg?branch=master)](https://travis-ci.org/ibab/protobuf-laminate)
+
 An efficiently packed data format for protocol buffer messages, written in C++.
 
 The [Dremel paper](https://static.googleusercontent.com/media/research.google.com/en//pubs/archive/36632.pdf)
