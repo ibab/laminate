@@ -8,7 +8,7 @@ using namespace example;
 int main() {
 
   Person person;
-  auto meta = laminate::CreateFieldMeta(person);
+  auto meta = laminate::CreateColumnWriter(person);
   for (int i = 0; i < meta.names.size(); i++) {
     std::cout << meta.names[i] << std::endl;
   }

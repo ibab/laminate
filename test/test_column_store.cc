@@ -4,5 +4,4 @@
 #include "column_store.h"
 
 TEST(ColStoreTest, Run) {
-  laminate::
 }

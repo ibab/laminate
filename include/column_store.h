@@ -6,11 +6,12 @@
 namespace laminate {
 
 class ColumnWriter {
+public:
   std::vector<const google::protobuf::FieldDescriptor*> fds;
   std::vector<std::string> names;
 };
 
-ColumnWriter CreateFieldMeta(google::protobuf::Message &m);
+ColumnWriter CreateColumnWriter(google::protobuf::Message &m);
 
 }  // namespace laminate
 
