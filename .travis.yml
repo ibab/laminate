@@ -1,10 +1,12 @@
 language: c++
-compiler:
-  - gcc-5
 
 addons:
   apt:
+    sources:
+      - ubuntu-toolchain-r-test
     packages:
+      - gcc-4.8
+      - g++-4.8
       - wget
       # Package list from http://bazel.io/docs/install.html
       - openjdk-7-jdk
@@ -16,7 +18,7 @@ before_install:
   - sha256sum -c bazel-0.3.1-jdk7-installer-linux-x86_64.sh.sha256
   - bash bazel-0.3.1-jdk7-installer-linux-x86_64.sh --user
   # Use .bazelrc only after installation
-  - mv bazelrc .bazelrc
+  - cp ci/bazelrc .bazelrc
 
 script:
   - bazel test //...

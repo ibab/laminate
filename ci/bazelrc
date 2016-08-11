@@ -7,6 +7,7 @@ common --ignore_unsupported_sandboxing
 common --genrule_strategy=standalone
 common --spawn_strategy=standalone
 common --color=yes
+common --crosstool_top=//ci/tools/cpp:toolchain
 
 # Build options
 common --linkopt=-lrt
