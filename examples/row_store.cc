@@ -4,7 +4,7 @@
 #include <google/protobuf/text_format.h>
 
 #include "row_store.h"
-#include "examples/main.pb.h"
+#include "examples/example.pb.h"
 
 // Example for how to write messages
 void write_messages(const std::string& filename, int number) {
