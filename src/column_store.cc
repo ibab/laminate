@@ -5,6 +5,7 @@
 #include <google/protobuf/message.h>
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/descriptor.pb.h>
+#include <H5Cpp.h>
 
 #include "include/column_store.h"
 
@@ -42,6 +43,21 @@ ColumnWriter CreateColumnWriter(Message &m) {
       names.push_back(std::get<1>(info));
     }
   }
+
+  H5std_string fname = "file.h5";
+  H5std_string dset = "myData";
+  H5::H5File file(fname, H5F_ACC_TRUNC);
+  hsize_t dimsf[2];              // dataset dimensions
+  dimsf[0] = 10;
+  dimsf[1] = 10;
+  H5::DataSpace dataspace(2, dimsf);
+  H5::IntType dtype(H5::PredType::NATIVE_INT);
+  dtype.setOrder(H5T_ORDER_LE);
+  H5::DataSet dataset = file.createDataSet(dset, dtype, dataspace);
+
+  int data[10][10];
+  dataset.write(data, H5::PredType::NATIVE_INT);
+
   return ColumnWriter{fds, names};
 }
 

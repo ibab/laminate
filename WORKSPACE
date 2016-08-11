@@ -25,3 +25,11 @@ new_git_repository(
     commit = "ec44c6c1675c25b9827aacd08c02433cccde7780",
     build_file = "gtest.BUILD",
 )
+
+new_http_archive(
+    name = "hdf5",
+    url = "http://www.hdfgroup.org/ftp/HDF5/current/src/hdf5-1.8.17.tar.gz",
+    sha256 = "d9cda297ee76ade9881c4208987939250d397bae6252d0ccb66fa7d24d67e263",
+    strip_prefix = "hdf5-1.8.17",
+    build_file = "hdf5.BUILD",
+)

@@ -7,6 +7,7 @@ cc_library(
     includes = ["include"],
     visibility = ["//visibility:public"],
     deps = ["@protobuf//:protobuf",
-            "@blosc//:blosc"]
+            "@blosc//:blosc",
+            "@hdf5//:hdf5_cpp"]
 )
 
