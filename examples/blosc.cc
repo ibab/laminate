@@ -24,7 +24,7 @@ void writeValues() {
   std::uniform_int_distribution<> uniform(0, 100);
 
   auto options = BloscOutputStream::DefaultOptions();
-  options.compressor = "lz4";
+  options.compressor = "zlib";
   options.compression_level = 9;
   options.use_shuffling = true;
   options.typesize_bits = 32;
