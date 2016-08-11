@@ -2,10 +2,6 @@
 startup --host_jvm_args=-Xmx2500m
 startup --batch
 
-common --jobs=32
-common --progress_report_interval=10
-#common --show_timestamps
-
 # Can't use sandboxing on this machine
 common --ignore_unsupported_sandboxing
 common --genrule_strategy=standalone
