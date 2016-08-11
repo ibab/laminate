@@ -8,6 +8,7 @@
 #include <H5Cpp.h>
 
 #include "include/column_store.h"
+#include "include/hdf_stream.h"
 
 namespace laminate {
 
@@ -55,8 +56,8 @@ ColumnWriter CreateColumnWriter(Message &m) {
   dtype.setOrder(H5T_ORDER_LE);
   H5::DataSet dataset = file.createDataSet(dset, dtype, dataspace);
 
-  int data[10][10];
-  dataset.write(data, H5::PredType::NATIVE_INT);
+  std::array<std::array<int, 10>, 10> data{};
+  dataset.write(&data[0][0], H5::PredType::NATIVE_INT);
 
   return ColumnWriter{fds, names};
 }

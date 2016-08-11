@@ -9,11 +9,9 @@ using google::protobuf::int64;
 
 class BloscOutputStream : public google::protobuf::io::ZeroCopyOutputStream {
   public:
-  /* 
-   * Options for the blosc compressor and the output stream.
-   * Many of these are identical to the arguments of the
-   * `blosc_decompress` function in `blosc.h`.
-   */
+  // Options for the blosc compressor and the output stream.
+  // Many of these are identical to the arguments of the
+  // `blosc_decompress` function in `blosc.h`.
   class Options {
       public:
           // Default: 5
@@ -42,24 +40,19 @@ class BloscOutputStream : public google::protobuf::io::ZeroCopyOutputStream {
           int chunk_size;
   };
 
-  /*
-   * Constructor assuming default compression options
-   */
+  //Constructor assuming default compression options
   BloscOutputStream(google::protobuf::io::ZeroCopyOutputStream* output);
-  /*
-   * Constructor that allows you to set compression options
-   */
+
+  //Constructor that allows you to set compression options
   BloscOutputStream(google::protobuf::io::ZeroCopyOutputStream* output,
                     const Options& options);
   ~BloscOutputStream();
   bool Next(void** data, int* size);
   void BackUp(int count);
   int64 ByteCount() const;
-  /*
-   * Compresses the internal buffer and writes it downstream.
-   * Calling this function can result in compressed chunks smaller
-   * than the default one and thus smaller compression ratios.
-   */
+  // Compresses the internal buffer and writes it downstream.
+  // Calling this function can result in compressed chunks smaller
+  // than the default one and thus smaller compression ratios.
   void Flush();
 
   static Options DefaultOptions();
