@@ -1,6 +1,5 @@
 
 startup --host_jvm_args=-Xmx2500m
-startup --batch
 
 # Can't use sandboxing on this machine
 common --ignore_unsupported_sandboxing
@@ -8,6 +7,8 @@ common --genrule_strategy=standalone
 common --spawn_strategy=standalone
 common --color=yes
 common --crosstool_top=//ci/tools/cpp:toolchain
+common --ram_utilization_factor=10
+common --jobs=8
 
 # Build options
 common --linkopt=-lrt
