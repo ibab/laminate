@@ -5,7 +5,6 @@
 #include <google/protobuf/io/zero_copy_stream.h>
 #include <google/protobuf/io/coded_stream.h>
 
-
 namespace laminate {
 
 using google::protobuf::int64;
