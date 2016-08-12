@@ -1,5 +1,5 @@
-#include <iostream>
 #include "blosc_stream.h"
+#include <iostream>
 
 using google::protobuf::io::ZeroCopyOutputStream;
 using google::protobuf::io::ZeroCopyInputStream;
@@ -32,21 +32,15 @@ void BloscOutputStream::Flush() {
   int blosc_max_buffer_size = buffer_filled_ + BLOSC_MAX_OVERHEAD;
 
   int blosc_buffer_size = blosc_compress_ctx(
-      options_.compression_level,
-      options_.use_shuffling,
-      options_.typesize_bits,
-      buffer_filled_,
-      buffer_,
-      blosc_buffer_,
-      blosc_max_buffer_size,
-      options_.compressor.c_str(),
-      options_.blocksize,
+      options_.compression_level, options_.use_shuffling,
+      options_.typesize_bits, buffer_filled_, buffer_, blosc_buffer_,
+      blosc_max_buffer_size, options_.compressor.c_str(), options_.blocksize,
       options_.numinternalthread);
 
   // We create a new CodedOutputStream for each compressed
   // chunk we write. Don't worry, this is fast!
   google::protobuf::io::CodedOutputStream coded(output_);
-  
+
   // First, we write a header consisting of 2 varints:
   //  - compressed size of chunk
   //  - uncompressed size of chunk
@@ -103,80 +97,85 @@ BloscOutputStream::Options BloscOutputStream::DefaultOptions() {
   return options;
 }
 
-int64 BloscOutputStream::ByteCount() const { return bytes_written_; }
-
-BloscInputStream::BloscInputStream(google::protobuf::io::ZeroCopyInputStream* input)
-    : input_(input)
-{
-    uncompressed_data_ = nullptr;
-    read_ = 0;
-    uncompressed_size_ = 0;
-    served_ = uncompressed_size_;
-    bytecount_ = 0;
+int64 BloscOutputStream::ByteCount() const {
+  return bytes_written_;
 }
 
-BloscInputStream::~BloscInputStream() {
+BloscInputStream::BloscInputStream(
+    google::protobuf::io::ZeroCopyInputStream* input)
+    : input_(input) {
+  uncompressed_data_ = nullptr;
+  read_ = 0;
+  uncompressed_size_ = 0;
+  served_ = uncompressed_size_;
+  bytecount_ = 0;
 }
+
+BloscInputStream::~BloscInputStream() {}
 
 bool BloscInputStream::readChunk() {
-    CodedInputStream coded(input_);
+  CodedInputStream coded(input_);
 
-    uint32_t compressed_size;
+  uint32_t compressed_size;
 
-    bool ok = true;
+  bool ok = true;
 
-    ok &= coded.ReadVarint32(&compressed_size);
-    if (!ok) { return false; }
-    ok &= coded.ReadVarint32(&uncompressed_size_);
-    if (!ok) { return false; }
+  ok &= coded.ReadVarint32(&compressed_size);
+  if (!ok) {
+    return false;
+  }
+  ok &= coded.ReadVarint32(&uncompressed_size_);
+  if (!ok) {
+    return false;
+  }
 
-    google::protobuf::io::CodedInputStream::Limit limit = coded.PushLimit(compressed_size);
-    void* compressed_data = operator new(compressed_size);
-    operator delete(uncompressed_data_);
-    uncompressed_data_ = operator new(uncompressed_size_);
+  google::protobuf::io::CodedInputStream::Limit limit =
+      coded.PushLimit(compressed_size);
+  void* compressed_data = operator new(compressed_size);
+  operator delete(uncompressed_data_);
+  uncompressed_data_ = operator new(uncompressed_size_);
 
-    ok &= coded.ReadRaw(compressed_data, compressed_size);
-    coded.PopLimit(limit);
+  ok &= coded.ReadRaw(compressed_data, compressed_size);
+  coded.PopLimit(limit);
 
-    if (ok) {
-        blosc_decompress_ctx(
-            compressed_data,
-            uncompressed_data_,
-            uncompressed_size_,
-            4);
-    }
+  if (ok) {
+    blosc_decompress_ctx(compressed_data, uncompressed_data_,
+                         uncompressed_size_, 4);
+  }
 
-    operator delete(compressed_data);
-    served_ = 0;
-    return ok;
+  operator delete(compressed_data);
+  served_ = 0;
+  return ok;
 }
 
 bool BloscInputStream::Next(const void** data, int* size) {
-    if (served_ == uncompressed_size_) {
-        bool ok = readChunk();
-        if (!ok) { return false; }
+  if (served_ == uncompressed_size_) {
+    bool ok = readChunk();
+    if (!ok) {
+      return false;
     }
+  }
 
-    *data = (char*) uncompressed_data_ + served_;
-    *size = uncompressed_size_ - served_;
+  *data = (char*)uncompressed_data_ + served_;
+  *size = uncompressed_size_ - served_;
 
-    served_ = uncompressed_size_;
-    bytecount_ += *size;
-    return true;
+  served_ = uncompressed_size_;
+  bytecount_ += *size;
+  return true;
 }
 
 void BloscInputStream::BackUp(int count) {
-    served_ -= count;
-    bytecount_ -= count;
+  served_ -= count;
+  bytecount_ -= count;
 }
 
 bool BloscInputStream::Skip(int count) {
-    std::cout << "Skip " << count << std::endl;
-    served_ += count;
-    bytecount_ += count;
-    return true;
+  std::cout << "Skip " << count << std::endl;
+  served_ += count;
+  bytecount_ += count;
+  return true;
 }
 
 int64 BloscInputStream::ByteCount() const {
-    return bytecount_;
+  return bytecount_;
 }

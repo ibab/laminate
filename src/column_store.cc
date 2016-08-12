@@ -1,11 +1,11 @@
-#include <iostream>
-#include <stack>
-#include <vector>
-#include <tuple>
-#include <google/protobuf/message.h>
+#include <H5Cpp.h>
 #include <google/protobuf/descriptor.h>
 #include <google/protobuf/descriptor.pb.h>
-#include <H5Cpp.h>
+#include <google/protobuf/message.h>
+#include <iostream>
+#include <stack>
+#include <tuple>
+#include <vector>
 
 #include "include/column_store.h"
 #include "include/hdf_stream.h"
@@ -19,7 +19,7 @@ using google::protobuf::FieldDescriptor;
 // Performs a depth-first traversal of the protobuf definition,
 // storing the field descriptors and fully qualified names of
 // all leaf (== primitive) entries.
-ColumnWriter CreateColumnWriter(Message &m) {
+ColumnWriter CreateColumnWriter(Message& m) {
   typedef std::tuple<const FieldDescriptor*, std::string> Info;
   const Descriptor* desc = m.GetDescriptor();
   std::stack<Info> stack;

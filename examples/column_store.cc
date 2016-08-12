@@ -1,12 +1,11 @@
 
-#include <iostream>
 #include "column_store.h"
+#include <iostream>
 #include "examples/example.pb.h"
 
 using namespace example;
 
 int main() {
-
   Person person;
   auto meta = laminate::CreateColumnWriter(person);
   for (unsigned int i = 0; i < meta.names.size(); i++) {

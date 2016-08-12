@@ -14,8 +14,8 @@
  * desired instead of the more efficiently packed column store.
  */
 
-#include <google/protobuf/message.h>
 #include <google/protobuf/io/zero_copy_stream.h>
+#include <google/protobuf/message.h>
 
 namespace laminate {
 class RowStore {
@@ -39,21 +39,21 @@ class RowStore {
    * Remember to Clear() your message if you are reusing
    * it in a loop!
    */
-  void Put(const google::protobuf::Message &message);
+  void Put(const google::protobuf::Message& message);
   /*
    * Reads the next protocol buffer message contained
    * in the RowStore into the given message.
    * The given message is automatically cleared before
    * reading when passing it to this function.
    */
-  bool ReadNext(google::protobuf::Message *message);
+  bool ReadNext(google::protobuf::Message* message);
   /*
    * Reads the next protocol buffer message contained
    * in the RowStore into the given message.
    * The given message is not cleared, which means
    * that the fields will be merged into it.
    */
-  bool MergeNext(google::protobuf::Message *message);
+  bool MergeNext(google::protobuf::Message* message);
   /*
    * Checks if the store is currently open.
    */
@@ -66,10 +66,10 @@ class RowStore {
   private:
   int fd_;
   bool is_open_;
-  google::protobuf::io::ZeroCopyOutputStream *file_out_;
-  google::protobuf::io::ZeroCopyOutputStream *output_;
-  google::protobuf::io::ZeroCopyInputStream *file_in_;
-  google::protobuf::io::ZeroCopyInputStream *input_;
+  google::protobuf::io::ZeroCopyOutputStream* file_out_;
+  google::protobuf::io::ZeroCopyOutputStream* output_;
+  google::protobuf::io::ZeroCopyInputStream* file_in_;
+  google::protobuf::io::ZeroCopyInputStream* input_;
 };
 }
 

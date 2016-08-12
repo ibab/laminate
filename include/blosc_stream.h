@@ -1,9 +1,9 @@
 #ifndef LAMINATE_BLOSC_STREAM_H
 #define LAMINATE_BLOSC_STREAM_H
 
-#include <google/protobuf/io/zero_copy_stream.h>
-#include <google/protobuf/io/coded_stream.h>
 #include <blosc.h>
+#include <google/protobuf/io/coded_stream.h>
+#include <google/protobuf/io/zero_copy_stream.h>
 
 using google::protobuf::int64;
 
@@ -13,37 +13,37 @@ class BloscOutputStream : public google::protobuf::io::ZeroCopyOutputStream {
   // Many of these are identical to the arguments of the
   // `blosc_decompress` function in `blosc.h`.
   class Options {
-      public:
-          // Default: 5
-          int compression_level;
-          // As we can't know about the size of the
-          // data type a priori, we disable bit shuffling.
-          // Set this to `true` if your input data is homogeneous
-          // and you know the length of each item in bits.
-          // Default: false
-          bool use_shuffling;
-          // Default: 32
-          int typesize_bits;
-          // Default: "blosclz"
-          std::string compressor;
-          // Blosc will automatically pick a blocksize
-          // Default: 0
-          int blocksize;
-          // Default: 4
-          int numinternalthread;
-          // Length of the internal buffer that the output stream
-          // will try to fill and compress in one piece.
-          // As blosc introduces a small header for each chunk,
-          // settings this to a larger number could make sense if
-          // your data is highly compressed.
-          // Default: 1024 * 1024 bytes
-          int chunk_size;
+public:
+    // Default: 5
+    int compression_level;
+    // As we can't know about the size of the
+    // data type a priori, we disable bit shuffling.
+    // Set this to `true` if your input data is homogeneous
+    // and you know the length of each item in bits.
+    // Default: false
+    bool use_shuffling;
+    // Default: 32
+    int typesize_bits;
+    // Default: "blosclz"
+    std::string compressor;
+    // Blosc will automatically pick a blocksize
+    // Default: 0
+    int blocksize;
+    // Default: 4
+    int numinternalthread;
+    // Length of the internal buffer that the output stream
+    // will try to fill and compress in one piece.
+    // As blosc introduces a small header for each chunk,
+    // settings this to a larger number could make sense if
+    // your data is highly compressed.
+    // Default: 1024 * 1024 bytes
+    int chunk_size;
   };
 
-  //Constructor assuming default compression options
+  // Constructor assuming default compression options
   BloscOutputStream(google::protobuf::io::ZeroCopyOutputStream* output);
 
-  //Constructor that allows you to set compression options
+  // Constructor that allows you to set compression options
   BloscOutputStream(google::protobuf::io::ZeroCopyOutputStream* output,
                     const Options& options);
   ~BloscOutputStream();
@@ -75,6 +75,7 @@ class BloscInputStream : public google::protobuf::io::ZeroCopyInputStream {
   void BackUp(int count);
   bool Skip(int count);
   int64 ByteCount() const;
+
   private:
   google::protobuf::io::ZeroCopyInputStream* input_;
   void* uncompressed_data_;

@@ -1,0 +1,10 @@
+BasedOnStyle: Google
+AccessModifierOffset: -4
+AlwaysBreakTemplateDeclarations: true
+Standard: C++11
+IndentWidth: 2
+ColumnLimit: 79
+AllowShortBlocksOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Empty
+DerivePointerAlignment: false
+PointerAlignment: Left

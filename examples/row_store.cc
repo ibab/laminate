@@ -3,8 +3,8 @@
 
 #include <google/protobuf/text_format.h>
 
-#include "row_store.h"
 #include "examples/example.pb.h"
+#include "row_store.h"
 
 // Example for how to write messages
 void write_messages(const std::string& filename, int number) {
@@ -32,10 +32,10 @@ void print_messages(const std::string& filename) {
   example::Person person;
 
   while (store.ReadNext(&person)) {
-    //std::string out;
-    //google::protobuf::TextFormat::PrintToString(person, &out);
-    //std::cout << "Read message" << std::endl;
-    //std::cout << out;
+    // std::string out;
+    // google::protobuf::TextFormat::PrintToString(person, &out);
+    // std::cout << "Read message" << std::endl;
+    // std::cout << out;
   }
 }
 

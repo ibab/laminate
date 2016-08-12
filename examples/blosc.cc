@@ -1,22 +1,20 @@
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <fcntl.h>
-#include <random>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <iostream>
+#include <random>
 
+#include <google/protobuf/io/coded_stream.h>
 #include <google/protobuf/io/zero_copy_stream.h>
 #include <google/protobuf/io/zero_copy_stream_impl.h>
-#include <google/protobuf/io/coded_stream.h>
 #include "blosc_stream.h"
 
-
-const uint32_t total_number= 30000000;
+const uint32_t total_number = 30000000;
 
 using namespace google::protobuf;
 
 void writeValues() {
-
   int fd = open("out.blosc", O_CREAT | O_WRONLY | O_TRUNC, 0600);
   io::ZeroCopyOutputStream* out = new io::FileOutputStream(fd);
 
@@ -37,7 +35,7 @@ void writeValues() {
   int size;
 
   for (uint32_t i = 0; i < total_number; i++) {
-      coded->WriteLittleEndian32(i);
+    coded->WriteLittleEndian32(i);
   }
 
   delete coded;
@@ -46,28 +44,29 @@ void writeValues() {
 }
 
 void readValues() {
-    int fd = open("out.blosc", O_RDONLY, 0600);
-    io::ZeroCopyInputStream* in = new io::FileInputStream(fd);
-    io::ZeroCopyInputStream* blosc = new BloscInputStream(in);
-    io::CodedInputStream* coded = new io::CodedInputStream(blosc);
-    coded->SetTotalBytesLimit(500000000, -1);
+  int fd = open("out.blosc", O_RDONLY, 0600);
+  io::ZeroCopyInputStream* in = new io::FileInputStream(fd);
+  io::ZeroCopyInputStream* blosc = new BloscInputStream(in);
+  io::CodedInputStream* coded = new io::CodedInputStream(blosc);
+  coded->SetTotalBytesLimit(500000000, -1);
 
-    std::mt19937 rand(0);
-    std::uniform_int_distribution<> uniform(0, 100);
+  std::mt19937 rand(0);
+  std::uniform_int_distribution<> uniform(0, 100);
 
-    for (int i = 0; i < total_number; i++) {
-        uint32_t out;
-        int expected = i;
-        coded->ReadLittleEndian32(&out);
-        if (out != expected) {
-            std::cout << "Expected " << expected << " but got " << out << " at " << i << std::endl;
-            exit(1);
-        }
+  for (int i = 0; i < total_number; i++) {
+    uint32_t out;
+    int expected = i;
+    coded->ReadLittleEndian32(&out);
+    if (out != expected) {
+      std::cout << "Expected " << expected << " but got " << out << " at " << i
+                << std::endl;
+      exit(1);
     }
+  }
 
-    delete coded;
-    delete blosc;
-    delete in;
+  delete coded;
+  delete blosc;
+  delete in;
 }
 
 int main() {

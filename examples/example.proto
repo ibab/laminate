@@ -20,4 +20,3 @@ message Person {
 
   repeated PhoneNumber phones = 4;
 }
-

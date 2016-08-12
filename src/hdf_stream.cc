@@ -5,10 +5,10 @@ using google::protobuf::io::ZeroCopyInputStream;
 
 namespace laminate {
 
-HDFInputStream::HDFInputStream(const std::string &fname, const std::string &dataset) { }
+HDFInputStream::HDFInputStream(const std::string& fname,
+                               const std::string& dataset) {}
 
-HDFInputStream::~HDFInputStream() {
-}
+HDFInputStream::~HDFInputStream() {}
 
 int64 HDFInputStream::ByteCount() const {
   return 0;
@@ -22,10 +22,8 @@ bool HDFInputStream::Next(const void** data, int* size) {
   return false;
 }
 
-void HDFInputStream::BackUp(int count) {
+void HDFInputStream::BackUp(int count) {}
+
+template <>
+class HDFOutputStream<int>;
 }
-
-template<> class HDFOutputStream<int>;
-
-}
-

@@ -8,10 +8,10 @@
 #include "row_store.h"
 
 #include <fcntl.h>
+#include <google/protobuf/io/coded_stream.h>
+#include <google/protobuf/io/zero_copy_stream_impl.h>
 #include <unistd.h>
 #include <iostream>
-#include <google/protobuf/io/zero_copy_stream_impl.h>
-#include <google/protobuf/io/coded_stream.h>
 
 #include "blosc_stream.h"
 
@@ -135,7 +135,9 @@ bool RowStore::MergeNext(google::protobuf::Message *message) {
   return readDelimitedFrom(input_, message);
 }
 
-bool RowStore::IsOpen() { return is_open_; }
+bool RowStore::IsOpen() {
+  return is_open_;
+}
 
 void RowStore::Close() {
   close(fd_);

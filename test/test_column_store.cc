@@ -3,5 +3,4 @@
 
 #include "column_store.h"
 
-TEST(ColStoreTest, Run) {
-}
+TEST(ColStoreTest, Run) {}
