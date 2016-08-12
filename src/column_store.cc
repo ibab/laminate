@@ -45,20 +45,6 @@ ColumnWriter CreateColumnWriter(Message &m) {
     }
   }
 
-  H5std_string fname = "file.h5";
-  H5std_string dset = "myData";
-  H5::H5File file(fname, H5F_ACC_TRUNC);
-  hsize_t dimsf[2];              // dataset dimensions
-  dimsf[0] = 10;
-  dimsf[1] = 10;
-  H5::DataSpace dataspace(2, dimsf);
-  H5::IntType dtype(H5::PredType::NATIVE_INT);
-  dtype.setOrder(H5T_ORDER_LE);
-  H5::DataSet dataset = file.createDataSet(dset, dtype, dataspace);
-
-  std::array<std::array<int, 10>, 10> data{};
-  dataset.write(&data[0][0], H5::PredType::NATIVE_INT);
-
   return ColumnWriter{fds, names};
 }
 

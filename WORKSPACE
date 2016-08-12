@@ -33,3 +33,10 @@ new_http_archive(
     strip_prefix = "hdf5-1.8.17",
     build_file = "bazel/hdf5.BUILD",
 )
+
+new_http_archive(
+  name = "boost",
+  url = "http://pilotfiber.dl.sourceforge.net/project/boost/boost/1.61.0/boost_1_61_0.tar.gz",
+  sha256 = "a77c7cc660ec02704c6884fbb20c552d52d60a18f26573c9cee0788bf00ed7e6",
+  build_file = "bazel/boost.BUILD",
+)

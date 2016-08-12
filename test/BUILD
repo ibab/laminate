@@ -1,7 +1,14 @@
+cc_test(
+    name = "test_hdf_stream",
+    srcs = ["test_hdf_stream.cc"],
+    copts = ["-std=c++11"],
+    deps = ["//:laminate", "@gtest//:main", "@boost//:filesystem"],
+    size = "small",
+)
 
 cc_test(
     name = "test_column_store",
-    srcs = glob(["test/test_column_store.cc"]),
+    srcs = ["test_column_store.cc"],
     copts = ["-std=c++11"],
     deps = ["//:laminate", "@gtest//:main"],
     size = "small",
@@ -9,7 +16,7 @@ cc_test(
 
 cc_test(
     name = "test_row_store",
-    srcs = glob(["test/test_row_store.cc"]),
+    srcs = ["test_row_store.cc"],
     copts = ["-std=c++11"],
     deps = ["//:laminate", "@gtest//:main"],
     size = "small",
