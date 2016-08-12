@@ -2,9 +2,9 @@
 cc_library(
     name = "laminate",
     srcs = glob(["src/*.cc"]),
-    hdrs = glob(["include/*.h"]),
+    hdrs = glob(["src/*.h"]),
     copts = ["-std=c++11"],
-    includes = ["include"],
+    includes = ["src"],
     visibility = ["//visibility:public"],
     deps = ["@protobuf//:protobuf",
             "@blosc//:blosc",

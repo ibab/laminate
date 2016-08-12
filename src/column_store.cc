@@ -7,8 +7,8 @@
 #include <tuple>
 #include <vector>
 
-#include "include/column_store.h"
-#include "include/hdf_stream.h"
+#include "column_store.h"
+#include "hdf_stream.h"
 
 namespace laminate {
 
