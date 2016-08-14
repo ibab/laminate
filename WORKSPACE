@@ -1,3 +1,4 @@
+workspace(name = "laminate")
 
 git_repository(
   name = "protobuf",

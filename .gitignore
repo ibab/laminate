@@ -31,5 +31,5 @@
 bazel-bin
 bazel-genfiles
 bazel-out
-bazel-protobuf-laminate
+bazel-laminate
 bazel-testlogs
