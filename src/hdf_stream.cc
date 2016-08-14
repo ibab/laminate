@@ -2,7 +2,8 @@
 
 namespace laminate {
 
-template <> class HDFOutputStream<int>;
-template <> class HDFInputStream<int>;
-
+template <>
+class HDFOutputStream<int>;
+template <>
+class HDFInputStream<int>;
 }

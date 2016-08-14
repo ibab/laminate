@@ -23,8 +23,8 @@ using google::protobuf::io::ZeroCopyInputStream;
 using google::protobuf::io::FileOutputStream;
 using google::protobuf::io::FileInputStream;
 
-bool writeDelimitedTo(const google::protobuf::MessageLite &message,
-                      google::protobuf::io::ZeroCopyOutputStream *rawOutput) {
+bool writeDelimitedTo(const google::protobuf::MessageLite& message,
+                      google::protobuf::io::ZeroCopyOutputStream* rawOutput) {
   // We create a new coded stream for each message. Don't worry, this is fast.
   google::protobuf::io::CodedOutputStream output(rawOutput);
 
@@ -32,7 +32,7 @@ bool writeDelimitedTo(const google::protobuf::MessageLite &message,
   const int size = message.ByteSize();
   output.WriteVarint32(size);
 
-  uint8_t *buffer = output.GetDirectBufferForNBytesAndAdvance(size);
+  uint8_t* buffer = output.GetDirectBufferForNBytesAndAdvance(size);
   if (buffer != NULL) {
     // Optimization:  The message fits in one buffer, so use the faster
     // direct-to-array serialization path.
@@ -46,8 +46,8 @@ bool writeDelimitedTo(const google::protobuf::MessageLite &message,
   return true;
 }
 
-bool readDelimitedFrom(google::protobuf::io::ZeroCopyInputStream *rawInput,
-                       google::protobuf::MessageLite *message) {
+bool readDelimitedFrom(google::protobuf::io::ZeroCopyInputStream* rawInput,
+                       google::protobuf::MessageLite* message) {
   // We create a new coded stream for each message. Don't worry, this is fast,
   // and it makes sure the 64MB total size limit is imposed per-message rather
   // than on the whole stream.
@@ -110,7 +110,7 @@ RowStore::~RowStore() {
   }
 }
 
-void RowStore::Put(const google::protobuf::Message &message) {
+void RowStore::Put(const google::protobuf::Message& message) {
   if (!output_) {
     std::cerr << "RowStore not opened in write mode" << std::endl;
     exit(1);
@@ -118,7 +118,7 @@ void RowStore::Put(const google::protobuf::Message &message) {
   writeDelimitedTo(message, output_);
 }
 
-bool RowStore::ReadNext(google::protobuf::Message *message) {
+bool RowStore::ReadNext(google::protobuf::Message* message) {
   if (!input_) {
     std::cerr << "RowStore not opened in read mode" << std::endl;
     exit(1);
@@ -127,7 +127,7 @@ bool RowStore::ReadNext(google::protobuf::Message *message) {
   return MergeNext(message);
 }
 
-bool RowStore::MergeNext(google::protobuf::Message *message) {
+bool RowStore::MergeNext(google::protobuf::Message* message) {
   if (!input_) {
     std::cerr << "RowStore not opened in read mode" << std::endl;
     exit(1);

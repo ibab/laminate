@@ -7,7 +7,6 @@
 #include <google/protobuf/io/zero_copy_stream.h>
 #include <sys/stat.h>
 #include <vector>
-#include <iostream>
 
 namespace laminate {
 
@@ -77,7 +76,7 @@ class HDFOutputStream : public google::protobuf::io::ZeroCopyOutputStream {
     hsize_t offset[1];
     offset[0] = size;
     dims[0] += size;
-    hsize_t start[1] = { 0 };
+    hsize_t start[1] = {0};
     dataset_.extend(dims);
     filespace = dataset_.getSpace();
     filespace.selectHyperslab(H5S_SELECT_SET, offset, old_size);
@@ -118,7 +117,7 @@ class HDFInputStream : public google::protobuf::io::ZeroCopyInputStream {
 
   public:
   HDFInputStream(const std::string& fname, const std::string& dataset)
-    : count_(0) {
+      : count_(0) {
     H5std_string filename = fname;
     H5std_string dset = dataset;
     hsize_t dims_[1];
@@ -129,15 +128,13 @@ class HDFInputStream : public google::protobuf::io::ZeroCopyInputStream {
     // TODO error if rank != 1
     int rank = filespace.getSimpleExtentNdims();
   }
-  ~HDFInputStream() {
-
-  }
+  ~HDFInputStream() {}
 
   bool ReadChunk(T** data, int* size) {
     H5::DataSpace filespace = dataset_.getSpace();
     filespace.getSimpleExtentDims(dims_);
     dims_[0] -= count_;
-    hsize_t start[1] = { count_ };
+    hsize_t start[1] = {count_};
     filespace.selectHyperslab(H5S_SELECT_SET, dims_, start);
     H5::DataSpace memspace(1, dims_);
     *data = new T[dims_[0]];
@@ -157,12 +154,8 @@ class HDFInputStream : public google::protobuf::io::ZeroCopyInputStream {
     return ReadChunk(const_cast<T**>(data), count);
   }
 
-  void BackUp(int count) {
-
-  }
-  bool Skip(int count) {
-
-  }
+  void BackUp(int count) {}
+  bool Skip(int count) {}
   int64 ByteCount() const {
     return count_ * sizeof(T);
   }
