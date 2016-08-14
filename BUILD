@@ -1,3 +1,4 @@
+load('//:bazel/compilation_database.bzl', 'compilation_database')
 
 cc_library(
     name = "laminate",
@@ -11,3 +12,10 @@ cc_library(
             "@hdf5//:hdf5_cpp"]
 )
 
+compilation_database(
+    name='compilation_database',
+    targets=['//:laminate',
+             '//examples:column_store',
+             '//examples:row_store',
+             '//test:test_hdf_stream'],
+)

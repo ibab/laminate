@@ -15,6 +15,7 @@ cc_binary(
     copts = ["-std=c++11"],
     deps = ["//:laminate",
             "example_protobuf"],
+    visibility = ['//visibility:public'],
 )
 
 cc_binary(
@@ -23,6 +24,7 @@ cc_binary(
     copts = ["-std=c++11"],
     deps = ["//:laminate",
             "example_protobuf"],
+    visibility = ['//visibility:public'],
 )
 
 cc_binary(
@@ -30,5 +32,6 @@ cc_binary(
     srcs = ["blosc.cc"],
     copts = ["-std=c++11"],
     deps = ["//:laminate"],
+    visibility = ['//visibility:public'],
 )
 

@@ -4,6 +4,7 @@ cc_test(
     copts = ["-std=c++11"],
     deps = ["//:laminate", "@gtest//:main", "@boost//:filesystem"],
     size = "small",
+    visibility = ['//visibility:public'],
 )
 
 cc_test(
