@@ -20,7 +20,7 @@ template <typename T>
 class HDFOutputStream : public google::protobuf::io::ZeroCopyOutputStream {
   public:
   struct Options {
-    Options() : chunksize(1 << 13) {}
+    Options() : chunksize(1 << 18) {}
     int chunksize;
   };
 
@@ -41,7 +41,7 @@ class HDFOutputStream : public google::protobuf::io::ZeroCopyOutputStream {
   public:
   HDFOutputStream(const std::string& fname, const std::string& dataset,
                   const Options& options = Options())
-      : count_(0), options_(options), filled_(0), buffer_(options.chunksize, 0) {
+      : count_(0), options_(options), filled_(0), buffer_(options.chunksize / sizeof(T), 0) {
     H5std_string filename = fname;
     H5std_string dset = dataset;
     if (exists(fname)) {
@@ -55,7 +55,7 @@ class HDFOutputStream : public google::protobuf::io::ZeroCopyOutputStream {
     } else {
       hsize_t chunkdims[1] = {1 << 10};
       plist_.setChunk(1, chunkdims);
-      plist_.setDeflate(7);
+      plist_.setDeflate(9);
 
       hsize_t dims[1];
       hsize_t maxdims[1] = {H5S_UNLIMITED};
@@ -149,7 +149,7 @@ class HDFInputStream : public google::protobuf::io::ZeroCopyInputStream {
 
   public:
   HDFInputStream(const std::string& fname, const std::string& dataset)
-      : count_(0), skip_(0), backup_(0), buffer_(1 << 14, 0) {
+      : count_(0), skip_(0), backup_(0), buffer_(1 << 18 / sizeof(T), 0) {
     H5std_string filename = fname;
     H5std_string dset = dataset;
     hsize_t dims_[1];
@@ -166,7 +166,7 @@ class HDFInputStream : public google::protobuf::io::ZeroCopyInputStream {
     H5::DataSpace filespace = dataset_.getSpace();
     filespace.getSimpleExtentDims(dims_);
     // TODO check for start < 0 or start > length
-    hsize_t chunk[1] = {1 << 14};
+    hsize_t chunk[1] = {1 << 18 / sizeof(T)};
     if (count_ >= dims_[0]) {
       return false;
     } else if (count_ + chunk[0] > dims_[0]) {

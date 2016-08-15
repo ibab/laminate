@@ -1,10 +1,16 @@
 #include <gtest/gtest.h>
 #include <boost/filesystem.hpp>
+#include <iostream>
+#include <random>
+#include <functional>
+#include <google/protobuf/io/coded_stream.h>
 
 #include "hdf_stream.h"
 
 using namespace laminate;
 namespace fs = boost::filesystem;
+using google::protobuf::io::CodedOutputStream;
+using google::protobuf::io::CodedInputStream;
 
 class TestHDFStream : public testing::Test {
   public:
@@ -17,6 +23,19 @@ class TestHDFStream : public testing::Test {
 
   void TearDown() override {
     fs::remove_all(tmppath_);
+  }
+
+  std::string tmppath_;
+};
+
+class TestHDFStreamVerbose : public testing::Test {
+  public:
+  void SetUp() override {
+    fs::path tmpdir = fs::temp_directory_path();
+    fs::path path = fs::unique_path();
+    fs::create_directory(tmpdir / path);
+    tmppath_ = (tmpdir / path).native();
+    std::cerr << "Output at " << tmppath_ << std::endl;
   }
 
   std::string tmppath_;
@@ -136,4 +155,33 @@ TEST_F(TestHDFStream, InputBackUp) {
   ASSERT_EQ(input_data[2], 7);
   ASSERT_EQ(input_data[3], 8);
   ASSERT_EQ(input_data[4], 9);
+}
+
+TEST_F(TestHDFStream, LargeWriteRead) {
+  std::random_device rnd_device;
+  std::mt19937 mersenne_engine(rnd_device());
+  std::uniform_int_distribution<int> dist(-100, 100);
+
+  auto rand = std::bind(dist, mersenne_engine);
+  std::vector<int> random_data(300000);
+  std::generate(random_data.begin(), random_data.end(), rand);
+
+  auto* output = new HDFOutputStream<int>(tmppath_ + "/" + "test.h5", "test");
+  auto* coded = new CodedOutputStream(output);
+  for (int x: random_data) {
+    coded->WriteLittleEndian32((unsigned int)x);
+  }
+  delete coded;
+  delete output;
+
+  auto* input = new HDFInputStream<int>(tmppath_ + "/" + "test.h5", "test");
+  auto* coded_in = new CodedInputStream(input);
+  unsigned int num;
+
+  for(int i = 0; i < random_data.size(); i++) {
+    coded_in->ReadLittleEndian32(&num);
+    ASSERT_EQ((int)num, random_data[i]);
+  }
+  delete coded_in;
+  delete input;
 }
