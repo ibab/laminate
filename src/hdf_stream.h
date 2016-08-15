@@ -7,6 +7,8 @@
 #include <google/protobuf/io/zero_copy_stream.h>
 #include <sys/stat.h>
 #include <vector>
+#include <array>
+#include <iostream>
 
 namespace laminate {
 
@@ -16,7 +18,7 @@ template <typename T>
 class HDFOutputStream : public google::protobuf::io::ZeroCopyOutputStream {
   public:
   struct Options {
-    Options() : chunksize(0) {}
+    Options() : chunksize(1 << 13) {}
     int chunksize;
   };
 
@@ -26,6 +28,8 @@ class HDFOutputStream : public google::protobuf::io::ZeroCopyOutputStream {
   H5::H5File file_;
   H5::DataSet dataset_;
   H5::DSetCreatPropList plist_;
+  int filled_;
+  std::vector<T> buffer_;
 
   bool exists(std::string path) {
     struct stat info;
@@ -35,7 +39,7 @@ class HDFOutputStream : public google::protobuf::io::ZeroCopyOutputStream {
   public:
   HDFOutputStream(const std::string& fname, const std::string& dataset,
                   const Options& options = Options())
-      : count_(0), options_(options) {
+      : count_(0), options_(options), filled_(0), buffer_(options.chunksize, 0) {
     H5std_string filename = fname;
     H5std_string dset = dataset;
     if (exists(fname)) {
@@ -63,44 +67,67 @@ class HDFOutputStream : public google::protobuf::io::ZeroCopyOutputStream {
   }
 
   ~HDFOutputStream() {
+    // We need to flush the buffered data to HDF5
+    WriteBuffer();
     plist_.close();
     file_.close();
   }
 
-  bool WriteChunk(T** data, int size) {
+  bool WriteBuffer() {
     H5::DataSpace filespace = dataset_.getSpace();
+
     hsize_t dims[1];
     filespace.getSimpleExtentDims(dims);
     hsize_t old_size[1];
     old_size[0] = dims[0];
-    hsize_t offset[1];
-    offset[0] = size;
-    dims[0] += size;
-    hsize_t start[1] = {0};
+    dims[0] += filled_;
     dataset_.extend(dims);
+
+    hsize_t offset[1] = {filled_};
+
     filespace = dataset_.getSpace();
     filespace.selectHyperslab(H5S_SELECT_SET, offset, old_size);
     H5::DataSpace memspace(1, offset);
-    memspace.selectHyperslab(H5S_SELECT_SET, offset, start);
-    dataset_.write(*data, H5::PredType::NATIVE_INT, memspace, filespace);
+    dataset_.write(&buffer_[0], H5::PredType::NATIVE_INT, memspace, filespace);
+    filled_ = 0;
     return true;
   }
 
   bool Next(void** data, int* size) {
-    int count = *size / sizeof(T);
-    bool ok = NextTyped((T**)data, &count);
+    int count;
+    bool ok = Next((T**) data, &count);
     *size = count * sizeof(T);
     return ok;
   }
 
-  bool NextTyped(T** data, int* count) {
-    count_ += *count;
-    bool ok = WriteChunk(data, *count);
-    *count = 0;
+  bool Next(T** data, int* count) {
+    bool ok = true;
+    if (filled_ == buffer_.size()) {
+      ok = WriteBuffer();
+      if (ok) {
+        count_ += buffer_.size();
+        filled_ = 0;
+      } else {
+        return false;
+      }
+    }
+
+    *data = &buffer_[filled_];
+    *count = buffer_.size() - filled_;
+    count_ += buffer_.size() - filled_;
+    filled_ = buffer_.size();
     return ok;
   }
 
-  void BackUp(int count) {}
+  void BackUp(int size) {
+    filled_ -= size / sizeof(T);
+    count_ -= size / sizeof(T);
+  }
+
+  void BackUpTyped(int count) {
+    filled_ -= count;
+    count_ -= count;
+  }
 
   int64 ByteCount() const {
     return count_ * sizeof(T);
@@ -114,10 +141,13 @@ class HDFInputStream : public google::protobuf::io::ZeroCopyInputStream {
   hsize_t dims_[1];
   H5::H5File file_;
   H5::DataSet dataset_;
+  int skip_;
+  int backup_;
+  std::vector<T> buffer_;
 
   public:
   HDFInputStream(const std::string& fname, const std::string& dataset)
-      : count_(0) {
+      : count_(0), skip_(0), backup_(0), buffer_(1 << 14, 0) {
     H5std_string filename = fname;
     H5std_string dset = dataset;
     hsize_t dims_[1];
@@ -133,29 +163,47 @@ class HDFInputStream : public google::protobuf::io::ZeroCopyInputStream {
   bool ReadChunk(T** data, int* size) {
     H5::DataSpace filespace = dataset_.getSpace();
     filespace.getSimpleExtentDims(dims_);
-    dims_[0] -= count_;
+    // TODO check for start < 0 or start > length
+    hsize_t chunk[1] = {1 << 14};
+    if (count_ >= dims_[0]) {
+      return false;
+    } else if (count_ + chunk[0] > dims_[0]) {
+      chunk[0] = dims_[0] - count_;
+    }
     hsize_t start[1] = {count_};
-    filespace.selectHyperslab(H5S_SELECT_SET, dims_, start);
-    H5::DataSpace memspace(1, dims_);
-    *data = new T[dims_[0]];
-    *size = dims_[0];
-    count_ = dims_[0] + count_;
+    backup_ = 0;
+    skip_ = 0;
+    filespace.selectHyperslab(H5S_SELECT_SET, chunk, start);
+    H5::DataSpace memspace(1, chunk);
+    count_ += chunk[0];
     dataset_.read(*data, H5::PredType::NATIVE_INT, memspace, filespace);
+    *size = chunk[0];
     return true;
   }
 
   bool Next(const void** data, int* size) {
-    bool ok = NextTyped((const T**)data, size);
+    bool ok = Next((const T**)data, size);
     *size *= sizeof(T);
     return ok;
   }
 
-  bool NextTyped(const T** data, int* count) {
+  bool Next(const T** data, int* count) {
+    *data = &buffer_[0];
     return ReadChunk(const_cast<T**>(data), count);
   }
 
-  void BackUp(int count) {}
-  bool Skip(int count) {}
+  void BackUp(int count) {
+    count_ -= count / sizeof(T);
+  }
+  void BackUpTyped(int count) {
+    count_ -= count;
+  }
+  bool Skip(int count) {
+    count_ += count / sizeof(T);
+  }
+  bool SkipTyped(int count) {
+    count_ += count;
+  }
   int64 ByteCount() const {
     return count_ * sizeof(T);
   }

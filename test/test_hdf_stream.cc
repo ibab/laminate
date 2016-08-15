@@ -37,27 +37,15 @@ TEST_F(TestHDFStream, ConstructTwice) {
 
 TEST_F(TestHDFStream, WriteTo) {
   auto* output = new HDFOutputStream<int>(tmppath_ + "/" + "test.h5", "test");
-  int data[] = {1, 2, 3, 4, 5};
-  int count = sizeof(data);
-  void* arg = (void*)data;
-  while (count > 0) {
-    output->Next(&arg, &count);
+  int* data;
+  int count;
+  output->Next(&data, &count);
+  for (int i = 0; i < count; i++) {
+    data[i] = i;
   }
-  ASSERT_EQ(count, 0);
-  ASSERT_EQ(output->ByteCount(), sizeof(data));
-  delete output;
-}
+  output->BackUpTyped(3);
 
-TEST_F(TestHDFStream, TypedWriteTo) {
-  auto* output = new HDFOutputStream<int>(tmppath_ + "/" + "test.h5", "test");
-  int data[] = {1, 2, 3, 4, 5};
-  int* data_ = static_cast<int*>(data);
-  int count = 5;
-  while (count > 0) {
-    output->NextTyped(&data_, &count);
-  }
-  ASSERT_EQ(count, 0);
-  ASSERT_EQ(output->ByteCount(), sizeof(data));
+  ASSERT_EQ(output->ByteCount(), (count - 3) * sizeof(int));
   delete output;
 }
 
@@ -80,41 +68,72 @@ TEST_F(TestHDFStream, TypedWriteRead) {
   auto* input = new HDFInputStream<int>(tmppath_ + "/" + "test.h5", "test");
 
   // Write
-  int data[] = {1, 2, 3, 4, 5};
-  int* data_ = (int*)data;
-  int count = 5;
-  while (count > 0) {
-    output->NextTyped(&data_, &count);
+  int* data;
+  int count;
+  output->Next(&data, &count);
+  for (int i = 0; i < 5; i++) {
+    data[i] = i;
   }
+  output->BackUpTyped(count - 5);
+  delete output;
 
   // Read
   const int* input_data;
-  int size;
-  input->NextTyped(&input_data, &size);
-  ASSERT_EQ(size, 5);
-  ASSERT_EQ(input_data[0], 1);
-  ASSERT_EQ(input_data[1], 2);
-  ASSERT_EQ(input_data[2], 3);
-  ASSERT_EQ(input_data[3], 4);
-  ASSERT_EQ(input_data[4], 5);
+  input->Next(&input_data, &count);
+  for (int i = 0; i < 5; i++) {
+    ASSERT_EQ(input_data[i], i);
+  }
+  input->BackUpTyped(count - 5);
+  delete input;
+}
+
+TEST_F(TestHDFStream, InputSkip) {
+  auto* output = new HDFOutputStream<int>(tmppath_ + "/" + "test.h5", "test");
 
   // Write
-  data_[0] = 6;
-  data_[1] = 7;
-  data_[2] = 8;
-  data_[3] = 9;
-  data_[4] = 10;
-  count = 5;
-  while (count > 0) {
-    output->NextTyped(&data_, &count);
+  int* data;
+  int count;
+  output->Next(&data, &count);
+  for (int i = 0; i < 5; i++) {
+    data[i] = i;
   }
+  output->BackUpTyped(count - 5);
+  delete output;
 
   // Read
-  input->NextTyped(&input_data, &size);
-  ASSERT_EQ(size, 5);
-  ASSERT_EQ(input_data[0], 6);
-  ASSERT_EQ(input_data[1], 7);
-  ASSERT_EQ(input_data[2], 8);
-  ASSERT_EQ(input_data[3], 9);
-  ASSERT_EQ(input_data[4], 10);
+  auto* input = new HDFInputStream<int>(tmppath_ + "/" + "test.h5", "test");
+  input->SkipTyped(2);
+  const int* input_data;
+  input->Next(&input_data, &count);
+  ASSERT_EQ(count, 3);
+  ASSERT_EQ(input_data[0], 2);
+  ASSERT_EQ(input_data[1], 3);
+  ASSERT_EQ(input_data[2], 4);
+  delete input;
+}
+
+TEST_F(TestHDFStream, InputBackUp) {
+  auto* output = new HDFOutputStream<int>(tmppath_ + "/" + "test.h5", "test");
+  // Write
+  int* data;
+  int count;
+  output->Next(&data, &count);
+  for (int i = 0; i < 10; i++) {
+    data[i] = i;
+  }
+  output->BackUpTyped(count - 10);
+  delete output;
+
+  // Read
+  auto* input = new HDFInputStream<int>(tmppath_ + "/" + "test.h5", "test");
+  const int* input_data;
+  input->SkipTyped(8);
+  input->BackUpTyped(3);
+  input->Next(&input_data, &count);
+  ASSERT_EQ(count, 5);
+  ASSERT_EQ(input_data[0], 5);
+  ASSERT_EQ(input_data[1], 6);
+  ASSERT_EQ(input_data[2], 7);
+  ASSERT_EQ(input_data[3], 8);
+  ASSERT_EQ(input_data[4], 9);
 }
