@@ -178,7 +178,7 @@ class HDFInputStream : public google::protobuf::io::ZeroCopyInputStream {
     filespace.selectHyperslab(H5S_SELECT_SET, chunk, start);
     H5::DataSpace memspace(1, chunk);
     count_ += chunk[0];
-    dataset_.read(*data, H5::PredType::NATIVE_INT, memspace, filespace);
+    dataset_.read(*data, AsHdfType<int>::value, memspace, filespace);
     *size = chunk[0];
     return true;
   }
