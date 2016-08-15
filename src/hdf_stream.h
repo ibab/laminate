@@ -10,6 +10,8 @@
 #include <array>
 #include <iostream>
 
+#include "src/types.h"
+
 namespace laminate {
 
 using google::protobuf::int64;
@@ -60,7 +62,7 @@ class HDFOutputStream : public google::protobuf::io::ZeroCopyOutputStream {
       // Start out with empty array;
       dims[0] = 0;
       H5::DataSpace dataspace(1, dims, maxdims);
-      H5::IntType dtype(H5::PredType::NATIVE_INT);
+      H5::IntType dtype(AsHdfType<T>::value);
       dtype.setOrder(H5T_ORDER_LE);
       dataset_ = file_.createDataSet(dset, dtype, dataspace, plist_);
     }
@@ -88,7 +90,7 @@ class HDFOutputStream : public google::protobuf::io::ZeroCopyOutputStream {
     filespace = dataset_.getSpace();
     filespace.selectHyperslab(H5S_SELECT_SET, offset, old_size);
     H5::DataSpace memspace(1, offset);
-    dataset_.write(&buffer_[0], H5::PredType::NATIVE_INT, memspace, filespace);
+    dataset_.write(&buffer_[0], AsHdfType<T>::value, memspace, filespace);
     filled_ = 0;
     return true;
   }
