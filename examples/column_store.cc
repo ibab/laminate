@@ -7,9 +7,6 @@ using namespace example;
 
 int main() {
   Person person;
-  auto meta = laminate::CreateColumnWriter(person);
-  for (unsigned int i = 0; i < meta.names.size(); i++) {
-    std::cout << meta.names[i] << std::endl;
-  }
+  auto meta = laminate::ColumnWriter::Create(person);
   return 0;
 }

@@ -16,10 +16,15 @@ using google::protobuf::Message;
 using google::protobuf::Descriptor;
 using google::protobuf::FieldDescriptor;
 
+ColumnWriter::ColumnWriter(
+    std::vector<const google::protobuf::FieldDescriptor*> fds,
+    std::vector<std::string> names)
+  : fds_(fds), names_(names) {}
+
 // Performs a depth-first traversal of the protobuf definition,
 // storing the field descriptors and fully qualified names of
 // all leaf (== primitive) entries.
-ColumnWriter CreateColumnWriter(Message& m) {
+std::tuple<ColumnWriter, Status> ColumnWriter::Create(Message& m) {
   typedef std::tuple<const FieldDescriptor*, std::string> Info;
   const Descriptor* desc = m.GetDescriptor();
   std::stack<Info> stack;
@@ -45,7 +50,7 @@ ColumnWriter CreateColumnWriter(Message& m) {
     }
   }
 
-  return ColumnWriter{fds, names};
+  return std::make_tuple(ColumnWriter(fds, names), Ok());
 }
 
 }  // namespace laminate
