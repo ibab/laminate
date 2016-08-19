@@ -127,17 +127,23 @@ Status ColumnWriter::ShredRecord(Message& m) {
     }
     CodedOutputStream coded(streams_[i]);
     FieldDescriptor::CppType type = fds.back()->cpp_type();
+
+#define CASE_TYPE(A, B, C)                    \
+  case FieldDescriptor::CPPTYPE_##A: {        \
+    B val = subref->Get##C(*sub, fds.back()); \
+    coded.WriteRaw(&val, sizeof(B));          \
+    break;                                    \
+  }
     switch(type) {
-      case FieldDescriptor::CPPTYPE_INT32:
-        {
-          int val = subref->GetInt32(*sub, fds.back());
-          coded.WriteRaw(&val, sizeof(int));
-          break;
-        }
+      CASE_TYPE(INT32, int, Int32);
+      CASE_TYPE(INT64, long, Int64);
+      CASE_TYPE(FLOAT, float, Float);
+      CASE_TYPE(DOUBLE, double, Double);
       default:
         return Status::Error("Unknown field type encountered");
     }
   }
+#undef CASE_TYPE
   return Status::OK();
 }
 
@@ -159,14 +165,21 @@ Status Store::Put(Message& m) {
     std::vector<ZeroCopyOutputStream*> streams;
     for(int i = 0; i < writer_.Names().size(); i++) {
       FieldDescriptor::CppType type = writer_.Descriptors()[i].back()->cpp_type();
-      std::cout << "Type is " << type << std::endl;
+
+#define CASE_TYPE(A, B)                                                   \
+  case FieldDescriptor::CPPTYPE_##A:                                      \
+    streams.push_back(new HDFOutputStream<B>(path_, writer_.Names()[i])); \
+    break;
+
       switch(type) {
-        case FieldDescriptor::CPPTYPE_INT32:
-          streams.push_back(new HDFOutputStream<int>(path_, writer_.Names()[i]));
-          break;
+        CASE_TYPE(INT32, int);
+        CASE_TYPE(INT64, long);
+        CASE_TYPE(FLOAT, float);
+        CASE_TYPE(DOUBLE, double);
         default:
           return Status::Error("Unknown field type encountered");
       }
+#undef CASE_TYPE
     }
     writer_.SetStreams(streams);
     initialized_ = true;

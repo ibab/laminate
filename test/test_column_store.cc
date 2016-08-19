@@ -37,12 +37,14 @@ class TestStoreVerbose : public testing::Test {
   std::string tmppath_;
 };
 
-TEST_F(TestStore, Run) {
+TEST_F(TestStoreVerbose, Run) {
   laminate::Store store(tmppath_ + "/test.h5", "w");
   test::TestMessage msg;
-  msg.set_value1(42);
+  msg.set_value1(1);
   msg.set_value2(2);
-  msg.mutable_value3()->set_inner_value1(3);
+  test::TestMessage::InnerMessage* inner = msg.mutable_value3();
+  inner->set_inner_value1(3);
+  inner->set_inner_value2(4);
 
   laminate::Status ok;
   for (int i = 0; i < 10; i++) {
@@ -50,7 +52,6 @@ TEST_F(TestStore, Run) {
     if (!ok) {
       break;
     }
-    std::cout << ok << std::endl;
   }
 
   ASSERT_EQ(ok.Message(), "OK");
