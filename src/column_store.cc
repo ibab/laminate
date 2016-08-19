@@ -111,6 +111,8 @@ Status ColumnWriter::SetStreams(std::vector<google::protobuf::io::ZeroCopyOutput
   return Status::OK();
 }
 
+// Splits a message into several columns using the Dremel column shredding
+// algorithm and writes the data into the output streams of this ColumnWriter
 Status ColumnWriter::ShredRecord(Message& m) {
   const Reflection* ref = m.GetReflection();
   for (int i = 0; i < names_.size(); i++) {
@@ -157,12 +159,13 @@ Status Store::Put(Message& m) {
     std::vector<ZeroCopyOutputStream*> streams;
     for(int i = 0; i < writer_.Names().size(); i++) {
       FieldDescriptor::CppType type = writer_.Descriptors()[i].back()->cpp_type();
+      std::cout << "Type is " << type << std::endl;
       switch(type) {
         case FieldDescriptor::CPPTYPE_INT32:
           streams.push_back(new HDFOutputStream<int>(path_, writer_.Names()[i]));
           break;
         default:
-          throw "Unknown field type encountered";
+          return Status::Error("Unknown field type encountered");
       }
     }
     writer_.SetStreams(streams);

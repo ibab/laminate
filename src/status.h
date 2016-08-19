@@ -19,7 +19,7 @@ class Status {
     return ok_;
   }
 
-  explicit operator bool() {
+  explicit operator bool() const {
     return Ok();
   }
 
@@ -31,7 +31,10 @@ class Status {
   }
 
   void Update(const Status& status) {
-    message_ = status.Message();
+    if (!status) {
+      ok_ = false;
+      message_ = status.Message();
+    }
   }
 
   private:

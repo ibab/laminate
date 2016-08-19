@@ -3,6 +3,7 @@
 #include <boost/filesystem.hpp>
 
 #include "column_store.h"
+#include "status.h"
 #include "test/test.pb.h"
 
 namespace fs = boost::filesystem;
@@ -43,7 +44,14 @@ TEST_F(TestStore, Run) {
   msg.set_value2(2);
   msg.mutable_value3()->set_inner_value1(3);
 
-  for (int i = 0; i < 1000000; i++) {
-    store.Put(msg);
+  laminate::Status ok;
+  for (int i = 0; i < 10; i++) {
+    ok.Update(store.Put(msg));
+    if (!ok) {
+      break;
+    }
+    std::cout << ok << std::endl;
   }
+
+  ASSERT_EQ(ok.Message(), "OK");
 }
