@@ -37,8 +37,8 @@ class TestStoreVerbose : public testing::Test {
   std::string tmppath_;
 };
 
-TEST_F(TestStoreVerbose, Run) {
-  laminate::Store store(tmppath_ + "/test.h5", "w");
+TEST_F(TestStore, Run) {
+  laminate::ColumnStore store(tmppath_ + "/test.h5", "w");
   test::TestMessage msg;
   msg.set_value1(1);
   msg.set_value2(2);
