@@ -1,6 +1,49 @@
 
 #include <gtest/gtest.h>
+#include <boost/filesystem.hpp>
 
 #include "column_store.h"
+#include "test/test.pb.h"
 
-TEST(ColStoreTest, Run) {}
+namespace fs = boost::filesystem;
+
+class TestStore : public testing::Test {
+  public:
+  void SetUp() override {
+    fs::path tmpdir = fs::temp_directory_path();
+    fs::path path = fs::unique_path();
+    fs::create_directory(tmpdir / path);
+    tmppath_ = (tmpdir / path).native();
+  }
+
+  void TearDown() override {
+    fs::remove_all(tmppath_);
+  }
+
+  std::string tmppath_;
+};
+
+class TestStoreVerbose : public testing::Test {
+  public:
+  void SetUp() override {
+    fs::path tmpdir = fs::temp_directory_path();
+    fs::path path = fs::unique_path();
+    fs::create_directory(tmpdir / path);
+    tmppath_ = (tmpdir / path).native();
+    std::cerr << "Output at " << tmppath_ << std::endl;
+  }
+
+  std::string tmppath_;
+};
+
+TEST_F(TestStore, Run) {
+  laminate::Store store(tmppath_ + "/test.h5", "w");
+  test::TestMessage msg;
+  msg.set_value1(42);
+  msg.set_value2(2);
+  msg.mutable_value3()->set_inner_value1(3);
+
+  for (int i = 0; i < 1000000; i++) {
+    store.Put(msg);
+  }
+}
