@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+package test;
+
+message TestMessage {
+  message InnerMessage {
+    double inner_value1 = 1;
+    int64  inner_value2 = 2;
+  }
+  int32 value1 = 1;
+  float value2 = 2;
+  InnerMessage value3 = 3;
+}
